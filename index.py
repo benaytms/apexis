@@ -131,7 +131,7 @@ def generate_word():
 def img_to_table(img_otd:dict, table_name:str) -> None:
     """
     Insert APOD information to the images table
-    from the apod_words Data Base.
+    from the Data Base.
     """
     if table_name not in ALLOWED_TABLES:
         raise ValueError(f"Unknown table: '{table_name}'")
@@ -167,7 +167,7 @@ def img_to_table(img_otd:dict, table_name:str) -> None:
 def word_to_table(word_otd:dict, table_name:str) -> None:
     """
     Insert Word information to the words table
-    from the apod_words Data Base.
+    from the Data Base.
     """
     if table_name not in ALLOWED_TABLES:
         raise ValueError(f"Unknown table: '{table_name}'")
