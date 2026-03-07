@@ -66,7 +66,7 @@ Download the latest APK from the [Releases](https://github.com/benaytms/apexis/r
 ---
 
 ## Version
-v.1.0.0
+v.1.0.1
 
 ---
 ## License
