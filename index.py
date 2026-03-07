@@ -105,7 +105,7 @@ def generate_word():
     Generates a random word using the Random Words API, then
     passes it to the Free Dictionary API to get its definition.
     Skips words already in the database.
-    Limit of 200 attempts before falling back to 'default'.
+    Limit of 120 attempts before falling back to 'default'.
     """
     max_attempts = 120
 
@@ -282,7 +282,7 @@ def main(drop_tables:bool = False) -> None:
         for meaning in meanings:
             for definition in meaning['definitions']:
                 definitions.append(definition['definition'])
-        definitions_result = str("; ".join(definitions)).replace('.', '')
+        definitions_result = "; ".join(definitions).rstrip('.')
         
         word_otd = {
             "word": word,
