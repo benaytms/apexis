@@ -9,8 +9,15 @@ from dotenv import load_dotenv
 from random import randint
 from datetime import date
 import os
+# for notifications on gmail
+import smtplib
+from email.mime.text import MIMEText
 
 load_dotenv()
+
+GMAIL_USER = str(os.getenv('GMAIL_USER'))
+GMAIL_PASSWORD = str(os.getenv('GMAIL_PASSWORD'))
+GMAIL_TO = str(os.getenv('GMAIL_TO'))
 
 NASA_API=str(os.getenv('NASA_API'))
 DATABASE_URL=str(os.getenv('DATABASE_URL'))
@@ -22,6 +29,24 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 IMGS_DIR = os.path.join(BASE_DIR, "images/")
 
 ALLOWED_TABLES = ("apod_images", "words_dict")
+
+def send_notification(subject:str, body:str) -> None:
+    """
+    Sends an email notification via Gmail
+    """
+    try:
+        msg = MIMEText(body)
+        msg['Subject'] = subject
+        msg['From'] = GMAIL_USER
+        msg['To'] = GMAIL_TO
+
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
+            server.login(GMAIL_USER, GMAIL_PASSWORD)
+            server.sendmail(GMAIL_USER, GMAIL_TO, msg.as_string())
+            print("Notification sent.")
+
+    except Exception as e:
+        print("Failed to send notification:", e)
 
 def word_exists(word: str) -> bool:
     """
@@ -235,6 +260,10 @@ def main(drop_tables:bool=False) -> None:
         print("Request successful")
     else:
         print("An error occurred: ", response.status_code)
+        send_notification(
+            subject="⚠️ APOD Script Failed",
+            body="NASA API request failed."
+        )
         exit(1)
 
     # creates image dictionary with information about the image
@@ -267,6 +296,10 @@ def main(drop_tables:bool=False) -> None:
     dict_data = generate_word()
 
     if dict_data=='default':
+        send_notification(
+            subject="⚠️ APOD Script Warning",
+            body="Could not generate a valid word today, using default. :("
+        )
         word_otd = {
             "word": 'default',
             "definition": 'automatic or standard way of acting or responding.'
@@ -279,6 +312,12 @@ def main(drop_tables:bool=False) -> None:
         }
     # adds the word and its definition to the table
     word_to_table(word_otd, WORDS_TABLE)
+
+    # sends notification
+    send_notification(
+        subject="APOD — Today's image is ready!",
+        body=f"Image: {img_otd['title']}\n\nWord: {word_otd['word']}\nDefinition: {word_otd['definition']}"
+    )
 
 
 if __name__ == "__main__":
