@@ -9,4 +9,4 @@ definition.
 ---
 
 ## Application example
-<img src="images/example.jpeg" alt="example image" width="350" height="700"/>
+<img src="example.jpeg" alt="example image" width="350" height="700"/>
