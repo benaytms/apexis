@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "apod-app",
-    "slug": "apod-app",
+    "name": "APEXIS",
+    "slug": "apexis",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
