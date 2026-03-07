@@ -5,7 +5,6 @@ Created on Fri Mar 6 23:20:00 2026
 """
 import requests as rq
 import psycopg2
-from psycopg2.extras import RealDictCursor
 from dotenv import load_dotenv
 from random import randint
 import os
