@@ -65,10 +65,10 @@ def download_img(image_data:dict):
     date = image_data['date']
     
     try:
-        os.makedirs('images', exist_ok=True)
+        os.makedirs(IMGS_DIR, exist_ok=True)
     
         filename = f"apod_{date}.jpg"
-        filepath = os.path.join('images/', filename)
+        filepath = os.path.join(IMGS_DIR, filename)
 
         try:
             img_response = rq.get(image_url)
