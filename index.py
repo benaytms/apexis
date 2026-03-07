@@ -12,7 +12,7 @@ import os
 load_dotenv()
 
 NASA_API=str(os.getenv('NASA_API'))
-DB_NAME=str(os.getenv('DB'))
+DB_NAME='apod_words.db'
 URL = "https://api.nasa.gov/planetary/apod?api_key=" + NASA_API
 DICT_URL = "https://api.dictionaryapi.dev/api/v2/entries/en"
 RANDOMWORD_URL = "https://random-words-api.kushcreates.com/api?language=en"
