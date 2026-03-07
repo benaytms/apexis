@@ -64,7 +64,7 @@ export default function App() {
 
   return (
     <View style={styles.wrapper}>
-
+      <StatusBar barStyle="light-content" backgroundColor="#0a0a0f" />
       {/* fullscreen image modal */}
       <Modal
         visible={modalVisible}
