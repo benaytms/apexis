@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException
-from models import ImageResponse, WordResponse
-import database as db
+from backend.models import ImageResponse, WordResponse
+import backend.database as db
 
 app = FastAPI(title="APOD & Word of the Day API")
 

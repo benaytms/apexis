@@ -1,6 +1,6 @@
 import sqlite3 as sql3
 from datetime import date
-from models import ImageResponse, WordResponse
+from backend.models import ImageResponse, WordResponse
 import os
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
