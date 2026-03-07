@@ -31,6 +31,8 @@ def send_notification(subject:str, body:str) -> None:
     Sends an email notification via Gmail.
     """
     try:
+        print(f"Attempting to send to: {GMAIL_TO}")
+        print(f"Using user: {GMAIL_USER}")  
         msg = MIMEText(body)
         msg['Subject'] = subject
         msg['From'] = GMAIL_USER
