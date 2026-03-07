@@ -8,6 +8,7 @@ class ImageResponse(BaseModel):
     explanation: str
     url: str
     copyright: Optional[str]=None
+    media_type: str='image'
 
 class WordResponse(BaseModel):
     id: int
