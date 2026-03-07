@@ -48,13 +48,17 @@ def send_notification(subject:str, body:str) -> None:
 def word_exists(word:str) -> bool:
     """
     Checks if word is already in the Data Base.
+    Returns False if table doesn't exist yet.
     """
-    with psycopg2.connect(DATABASE_URL) as conn:
-        with conn.cursor() as cursor:
-            cursor.execute(
-                "SELECT 1 FROM words_dict WHERE word = %s", (word,)
-            )
-            return cursor.fetchone() is not None
+    try:
+        with psycopg2.connect(DATABASE_URL) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    "SELECT 1 FROM words_dict WHERE word = %s", (word,)
+                )
+                return cursor.fetchone() is not None
+    except Exception:
+        return False
 
 
 def drop_table(table_name:str) -> None:
