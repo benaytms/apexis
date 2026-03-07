@@ -1,7 +1,10 @@
 .env
 .ipynb_checkpoints
+*/.ipynb_checkpoints
 *.ipynb
 .cache
 *.db-journal
 *.db
 step_by_step.txt
+*/__pycache__
+__pycache__
