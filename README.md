@@ -62,6 +62,7 @@ Download the latest APK from the [Releases](https://github.com/benaytms/apexis/r
 
 ## Planned
 - Push notifications for all users when daily content is updated
+  (So far the notifications work only for me)
 
 ---
 
