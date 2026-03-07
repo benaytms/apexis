@@ -223,6 +223,7 @@ def main(drop_tables:bool=False) -> None:
     if drop_tables:
         drop_table(IMGS_TABLE)
         drop_table(WORDS_TABLE)
+        print('All tables dropped!')
         exit(1)
 
     # makes the get request to the APOD URL
