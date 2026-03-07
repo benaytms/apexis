@@ -209,6 +209,8 @@ def word_to_table(word_otd:dict, table_name:str) -> None:
 def migrate(conn) -> None:
     """
     One-time migrations. Safe to run on every execution
+    since all statements use IF NOT EXISTS guards.
+    Only runs after tables have been created.
     """
     with conn.cursor() as cursor:
         cursor.execute("""
@@ -217,19 +219,12 @@ def migrate(conn) -> None:
         """)
 
 
-def main(drop_tables: bool = False) -> None:
+def main(drop_tables:bool = False) -> None:
     """
     Main function — integrates everything into one place.
     """
     IMGS_TABLE = ALLOWED_TABLES[0]
     WORDS_TABLE = ALLOWED_TABLES[1]
-
-    # run migrations
-    try:
-        with psycopg2.connect(DATABASE_URL) as conn:
-            migrate(conn)
-    except Exception as e:
-        print("Migration failed:", e)
 
     # drop tables if requested
     if drop_tables:
@@ -262,7 +257,7 @@ def main(drop_tables: bool = False) -> None:
         "media_type": img_data.get('media_type', 'image')
     }
 
-    # save image to database
+    # save image to database — creates table if it doesn't exist
     try:
         img_to_table(img_otd, IMGS_TABLE)
     except Exception as e:
@@ -272,6 +267,13 @@ def main(drop_tables: bool = False) -> None:
             body=f"Failed to save image to database: {e}"
         )
         exit(1)
+
+    # run migrations now that table is guaranteed to exist
+    try:
+        with psycopg2.connect(DATABASE_URL) as conn:
+            migrate(conn)
+    except Exception as e:
+        print("Migration failed:", e)
 
     # generate word and save to database
     dict_data = generate_word()
