@@ -282,6 +282,6 @@ def main(drop_tables:bool=False) -> None:
 
 
 if __name__ == "__main__":
-    action = True      # defines if should reset both tables or not, 0 for normal behavior, 1 for reset
+    action = False      # defines if should reset both tables or not, 0 for normal behavior, 1 for reset
     main(action)
 
