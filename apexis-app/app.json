@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "APEXIS",
-    "slug": "apexis",
+    "slug": "apod-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -21,7 +21,7 @@
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "package": "com.benaytms.apodapp"
+      "package": "com.benaytms.apexis"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -33,6 +33,7 @@
     },
     "plugins": [
       "expo-asset"
-    ]
+    ],
+    "owner": "benaytms"
   }
 }
