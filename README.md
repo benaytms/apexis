@@ -5,4 +5,4 @@ NASA's APOD plus Free Dictionary integration
 ---
 
 ## Application example
-![app_example](images/example.jpeg)
+<img src="images/example.jpeg" alt="example image" width="200" height="400"/>
