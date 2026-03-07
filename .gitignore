@@ -11,7 +11,7 @@ step_by_step.txt
 __pycache__
 apod_journal.txt
 
-apod-app/.gitignore 
+apexis-app/.gitignore 
 node_modules/
 
 .expo/
