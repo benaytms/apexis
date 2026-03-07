@@ -4,7 +4,8 @@ Created on Fri Mar 6 23:20:00 2026
 @author: benaytms
 """
 import requests as rq
-import sqlite3 as sql3
+import psycopg2
+from psycopg2.extras import RealDictCursor
 from dotenv import load_dotenv
 from random import randint
 import os
@@ -12,13 +13,14 @@ import os
 load_dotenv()
 
 NASA_API=str(os.getenv('NASA_API'))
-DB_NAME='apod_words.db'
+DATABASE_URL=str(os.getenv('DATABASE_URL'))
 URL = "https://api.nasa.gov/planetary/apod?api_key=" + NASA_API
 DICT_URL = "https://api.dictionaryapi.dev/api/v2/entries/en"
 RANDOMWORD_URL = "https://random-words-api.kushcreates.com/api?language=en"
 IMGS_DIR = "images/"
 
 ALLOWED_TABLES = ("apod_images", "words_dict")
+
 
 def drop_table(table_name:str) -> None:
     """
@@ -29,31 +31,27 @@ def drop_table(table_name:str) -> None:
         if table_name not in ALLOWED_TABLES:
             raise ValueError(f"Unknown table: '{table_name}'")
 
-        with sql3.connect(DB_NAME) as conn:
-            conn.execute(f"DROP TABLE {table_name};")
-            print(f"Table {table_name} dropped.")
+        with psycopg2.connect(DATABASE_URL) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(f"DROP TABLE IF EXISTS {table_name};")
+                print(f"Table {table_name} dropped.")
         
     except Exception as e:
         print("An error occurred: ", e)
 
 def print_table(table_name:str, limit:int=10) -> None:
-    """
-    Prints off specified table. The purpose of this function
-    is to check if the data on the Data Base is correctly stored.
-
-    Fetchall method causes memory overload on long tables, fetchmany
-    is used instead, which needs a limit of rows to be specified, the default is 10.
-    """
     try:
         if table_name not in ALLOWED_TABLES:
             raise ValueError(f"Unknown table: '{table_name}'")
 
-        with sql3.connect(DB_NAME) as conn:
-            rows = conn.execute(f"SELECT * FROM {table_name}").fetchmany(limit)
-            print(f"Table {table_name}:")
-            for row in rows:
-                print(row)
-            
+        with psycopg2.connect(DATABASE_URL) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(f"SELECT * FROM {table_name} LIMIT %s", (limit,))
+                rows = cursor.fetchall()
+                print(f"Table {table_name}:")
+                for row in rows:
+                    print(row)
+
     except Exception as e:
         print("An error occurred: ", e)
 
@@ -129,71 +127,65 @@ def generate_word():
     return 'default'
 
 def img_to_table(img_otd:dict, table_name:str) -> None:
-    """
-    Insert APOD information to the images table
-    from the Data Base.
-    """
     if table_name not in ALLOWED_TABLES:
         raise ValueError(f"Unknown table: '{table_name}'")
 
-    with sql3.connect(DB_NAME) as conn:
-        try:
-            cursor = conn.cursor()
-            cursor.execute(f'''
-                CREATE TABLE IF NOT EXISTS {table_name} (
-                    id INTEGER PRIMARY KEY,
-                    title TEXT UNIQUE NOT NULL,
-                    date TEXT UNIQUE NOT NULL,
-                    explanation TEXT NOT NULL,
-                    url TEXT NOT NULL,
-                    copyright TEXT
-                )
-            ''')
+    with psycopg2.connect(DATABASE_URL) as conn:
+        with conn.cursor() as cursor:
+            try:
+                cursor.execute(f'''
+                    CREATE TABLE IF NOT EXISTS {table_name} (
+                        id SERIAL PRIMARY KEY,
+                        title TEXT UNIQUE NOT NULL,
+                        date TEXT UNIQUE NOT NULL,
+                        explanation TEXT NOT NULL,
+                        url TEXT NOT NULL,
+                        copyright TEXT
+                    )
+                ''')
 
-            cursor.execute(f'''
-                INSERT OR IGNORE INTO {table_name} 
-                    (title, date, explanation, url, copyright)
-                VALUES 
-                    (?, ?, ?, ?, ?)
-                ''',
-                (img_otd['title'], img_otd['date'], 
-                 img_otd['exp'], img_otd['img_url'], 
-                 img_otd['copyr'])
+                cursor.execute(f'''
+                    INSERT INTO {table_name}
+                        (title, date, explanation, url, copyright)
+                    VALUES
+                        (%s, %s, %s, %s, %s)
+                    ON CONFLICT DO NOTHING
+                    ''',
+                    (img_otd['title'], img_otd['date'],
+                     img_otd['exp'], img_otd['img_url'],
+                     img_otd['copyr'])
                 )
 
-        except Exception as e:
-            print("Error: ", e)
+            except Exception as e:
+                print("Error: ", e)
 
 def word_to_table(word_otd:dict, table_name:str) -> None:
-    """
-    Insert Word information to the words table
-    from the Data Base.
-    """
     if table_name not in ALLOWED_TABLES:
         raise ValueError(f"Unknown table: '{table_name}'")
 
-    with sql3.connect(DB_NAME) as conn:
-        try:
-            cursor = conn.cursor()
-            cursor.execute(f'''
-            CREATE TABLE IF NOT EXISTS {table_name} (
-                id INTEGER PRIMARY KEY,
-                word TEXT UNIQUE NOT NULL,
-                definition TEXT NOT NULL
-                )
-            ''')
+    with psycopg2.connect(DATABASE_URL) as conn:
+        with conn.cursor() as cursor:
+            try:
+                cursor.execute(f'''
+                    CREATE TABLE IF NOT EXISTS {table_name} (
+                        id SERIAL PRIMARY KEY,
+                        word TEXT UNIQUE NOT NULL,
+                        definition TEXT NOT NULL
+                    )
+                ''')
 
-            cursor.execute(f'''
-                INSERT OR IGNORE INTO {table_name}
-                (word, definition)
-                VALUES 
-                (?, ?)
-                ''', 
-                (word_otd['word'], word_otd['definition'])
+                cursor.execute(f'''
+                    INSERT INTO {table_name}
+                        (word, definition)
+                    VALUES
+                        (%s, %s)
+                    ON CONFLICT DO NOTHING
+                    ''',
+                    (word_otd['word'], word_otd['definition'])
                 )
-        
-        except Exception as e:
-            print("Error: ", e)
+
+            except Exception as e:
+                print("Error: ", e)
 
 def main(drop_tables:bool=False) -> None:
     """
