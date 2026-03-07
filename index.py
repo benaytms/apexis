@@ -304,5 +304,5 @@ def main(drop_tables:bool = False) -> None:
 
 
 if __name__ == "__main__":
-    action = True  # set to True to reset all tables
+    action = False  # set to True to reset all tables
     main(action)
