@@ -36,7 +36,9 @@ def send_notification(subject:str, body:str) -> None:
         msg['From'] = GMAIL_USER
         msg['To'] = GMAIL_TO
 
-        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
+        with smtplib.SMTP('smtp.gmail.com', 587) as server:
+            server.ehlo()
+            server.starttls()
             server.login(GMAIL_USER, GMAIL_PASSWORD)
             server.sendmail(GMAIL_USER, GMAIL_TO, msg.as_string())
             print("Notification sent.")
@@ -105,7 +107,7 @@ def generate_word():
     Skips words already in the database.
     Limit of 200 attempts before falling back to 'default'.
     """
-    max_attempts = 200
+    max_attempts = 120
 
     for attempt in range(max_attempts):
 
@@ -210,19 +212,6 @@ def word_to_table(word_otd:dict, table_name:str) -> None:
                 print("Error: ", e)
 
 
-def migrate(conn) -> None:
-    """
-    One-time migrations. Safe to run on every execution
-    since all statements use IF NOT EXISTS guards.
-    Only runs after tables have been created.
-    """
-    with conn.cursor() as cursor:
-        cursor.execute("""
-            ALTER TABLE apod_images
-            ADD COLUMN IF NOT EXISTS media_type TEXT NOT NULL DEFAULT 'image'
-        """)
-
-
 def main(drop_tables:bool = False) -> None:
     """
     Main function — integrates everything into one place.
@@ -268,16 +257,9 @@ def main(drop_tables:bool = False) -> None:
         print("Failed to save image to DB:", e)
         send_notification(
             subject="⚠️ APEXIS Script Failed",
-            body=f"Failed to save image to database: {e}"
-        )
+            body=f"Failed to save image to database: {e}")
         exit(1)
 
-    # run migrations now that table is guaranteed to exist
-    try:
-        with psycopg2.connect(DATABASE_URL) as conn:
-            migrate(conn)
-    except Exception as e:
-        print("Migration failed:", e)
 
     # generate word and save to database
     dict_data = generate_word()
@@ -290,12 +272,21 @@ def main(drop_tables:bool = False) -> None:
         print("Could not generate a valid word today, using default. :(")
         send_notification(
             subject="⚠️ APEXIS Script Warning",
-            body="Could not generate a valid word today, using default."
-        )
+            body="Could not generate a valid word today, using default.")
     else:
+        word = dict_data[0].get("word")
+
+        # put together all definitions in one string
+        meanings=dict_data[0]['meanings']
+        definitions = []
+        for meaning in meanings:
+            for definition in meaning['definitions']:
+                definitions.append(definition['definition'])
+        definitions_result = str("; ".join(definitions)).replace('.', '')
+        
         word_otd = {
-            "word": dict_data[0].get("word", 'No word'),
-            "definition": dict_data[0]['meanings'][0]['definitions'][0].get("definition", 'No definition')
+            "word": word,
+            "definition": definitions_result
         }
 
     word_to_table(word_otd, WORDS_TABLE)
