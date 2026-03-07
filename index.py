@@ -13,12 +13,10 @@ from email.mime.text import MIMEText
 
 load_dotenv()
 
-GMAIL_USER = str(os.getenv('GMAIL_USER'))
-GMAIL_PASSWORD = str(os.getenv('GMAIL_PASSWORD'))
-GMAIL_TO = str(os.getenv('GMAIL_TO'))
-
 NASA_API = str(os.getenv('NASA_API'))
 DATABASE_URL = str(os.getenv('DATABASE_URL'))
+DISCORD_WEBHOOK = str(os.getenv('DISCORD_WEBHOOK'))
+
 APOD_URL = "https://api.nasa.gov/planetary/apod?api_key=" + NASA_API
 DICT_URL = "https://api.dictionaryapi.dev/api/v2/entries/en"
 RANDOMWORD_URL = "https://random-words-api.kushcreates.com/api?language=en"
@@ -28,22 +26,18 @@ ALLOWED_TABLES = ("apod_images", "words_dict")
 
 def send_notification(subject:str, body:str) -> None:
     """
-    Sends an email notification via Gmail.
+    Sends an email notification via .
     """
     try:
-        print(f"Attempting to send to: {GMAIL_TO}")
-        print(f"Using user: {GMAIL_USER}")  
-        msg = MIMEText(body)
-        msg['Subject'] = subject
-        msg['From'] = GMAIL_USER
-        msg['To'] = GMAIL_TO
-
-        with smtplib.SMTP('smtp.gmail.com', 587) as server:
-            server.ehlo()
-            server.starttls()
-            server.login(GMAIL_USER, GMAIL_PASSWORD)
-            server.sendmail(GMAIL_USER, GMAIL_TO, msg.as_string())
-            print("Notification sent.")
+        msg = f"**{subject}**\n\n{body}"
+        response = rq.post(DISCORD_WEBHOOK, json={"content": msg})
+        if response.status_code == 204:
+            print("Notification sent!")
+        else:
+            print(f"Notification failed: {response.status_code}")
+    except Exception as e:
+        print("Failed to send notification", e)
+        
 
     except Exception as e:
         print("Failed to send notification:", e)
