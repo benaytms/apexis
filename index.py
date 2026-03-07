@@ -202,7 +202,7 @@ def main(drop_tables:bool=False) -> None:
     IMGS_TABLE = ALLOWED_TABLES[0]
     WORDS_TABLE = ALLOWED_TABLES[1]
 
-    if drop_tables==True:
+    if drop_tables:
         drop_table(IMGS_TABLE)
         drop_table(WORDS_TABLE)
         exit(1)

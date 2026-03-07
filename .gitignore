@@ -2,9 +2,6 @@
 .ipynb_checkpoints
 *.ipynb
 .cache
-*.db
 *.db-journal
-*.sqlite
-*.sqlite3
-*.sql
-*.txt
+*.db
+step_by_step.txt
