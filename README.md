@@ -65,6 +65,10 @@ Download the latest APK from the [Releases](https://github.com/benaytms/apexis/r
 
 ---
 
+## Version
+v.1.0.0
+
+---
 ## License
 
 MIT
