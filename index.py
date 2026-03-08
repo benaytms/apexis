@@ -195,15 +195,14 @@ def word_to_table(word_otd:dict, table_name:str) -> None:
                     )
                 ''')
 
-                cursor.execute(f'''
-                    INSERT INTO {table_name}
-                        (word, definition)
-                    VALUES
-                        (%s, %s)
-                    ON CONFLICT DO NOTHING
-                    ''',
-                    (word_otd['word'], word_otd['definition'])
+                cursor.execute(
+                    f"SELECT 1 FROM {table_name} WHERE word = %s", (word_otd['word'],)
                 )
+                if not cursor.fetchone():
+                    cursor.execute(
+                        f"INSERT INTO {table_name} (word, definition) VALUES (%s, %s)",
+                        (word_otd['word'], word_otd['definition'])
+                    )
 
             except Exception as e:
                 print("Error: ", e)
