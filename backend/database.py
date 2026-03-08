@@ -13,10 +13,19 @@ def get_today_image() -> ImageResponse | None:
     today = datetime.now(ZoneInfo("America/Sao_Paulo")).date().isoformat()
     with psycopg2.connect(DATABASE_URL) as conn:
         with conn.cursor(cursor_factory=RealDictCursor) as cursor:
+            # try today first
             cursor.execute(
                 f"SELECT * FROM {IMGS_TABLE} WHERE date = %s", (today,)
             )
             row = cursor.fetchone()
+            
+            # fall back
+            if not row:
+                cursor.execute(
+                    f"SELECT * FROM {IMGS_TABLE} ORDER BY date DESC LIMIT 1"
+                )
+                row = cursor.fetchone()
+
     return ImageResponse(**dict(row)) if row else None
 
 def get_today_word() -> WordResponse | None:
