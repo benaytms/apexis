@@ -107,7 +107,7 @@ def generate_word():
 
     for attempt in range(max_attempts):
 
-        word_response = rq.get(RANDOMWORD_URL)
+        word_response = rq.get(RANDOMWORD_URL, timeout=10)
 
         if word_response.status_code != 200:
             continue
@@ -121,7 +121,7 @@ def generate_word():
                 print(f"Word '{random_word}' already in database, trying again...")
                 continue
 
-            dict_response = rq.get(f"{DICT_URL}/{random_word}")
+            dict_response = rq.get(f"{DICT_URL}/{random_word}", timeout=10)
             dict_data = dict_response.json()
 
             if isinstance(dict_data, list):
@@ -174,6 +174,7 @@ def img_to_table(img_otd:dict, table_name:str) -> None:
 
             except Exception as e:
                 print("Error: ", e)
+                raise
 
 
 def word_to_table(word_otd:dict, table_name:str) -> None:
@@ -223,7 +224,7 @@ def main(drop_tables:bool = False) -> None:
         exit(1)
 
     # fetch NASA APOD
-    response = rq.get(APOD_URL)
+    response = rq.get(APOD_URL, timeout=10)
 
     if response.status_code == 200:
         img_data = response.json()
@@ -278,6 +279,7 @@ def main(drop_tables:bool = False) -> None:
         for meaning in meanings:
             for definition in meaning['definitions']:
                 definitions.append(definition['definition'])
+        definitions = definitions[0:3]
         definitions_result = "; ".join(definitions).rstrip('.')
         
         word_otd = {
