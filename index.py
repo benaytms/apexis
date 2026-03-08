@@ -37,9 +37,6 @@ def send_notification(subject:str, body:str) -> None:
         print("Failed to send notification", e)
         
 
-    except Exception as e:
-        print("Failed to send notification:", e)
-
 
 def word_exists(word:str) -> bool:
     """
@@ -205,6 +202,7 @@ def word_to_table(word_otd:dict, table_name:str) -> None:
 
             except Exception as e:
                 print("Error: ", e)
+                raise
 
 
 def main(drop_tables:bool = False) -> None:
