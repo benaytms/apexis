@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   Modal,
   StatusBar,
+  RefreshControl,
 } from 'react-native'
 
 const API_BASE = "https://apod-production-9b08.up.railway.app"
@@ -21,27 +22,35 @@ export default function App() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [modalVisible, setModalVisible] = useState(false)
+  const [refreshing, setRefreshing] = useState(false)
+
+  const fetchToday = async () => {
+    try {
+      const [imgResponse, wordResponse] = await Promise.all([
+        fetch(`${API_BASE}/image/today`),
+        fetch(`${API_BASE}/word/today`),
+      ])
+
+      const img = await imgResponse.json()
+      const word = await wordResponse.json()
+
+      setImageData(img)
+      setWordData(word)
+      setError(null)
+    } catch (e) {
+      setError("Could not connect to server.")
+    } finally {
+      setLoading(false)
+      setRefreshing(false)
+    }
+  }
+
+  const onRefresh = async () => {
+    setRefreshing(true)
+    await fetchToday()
+  }
 
   useEffect(() => {
-    const fetchToday = async () => {
-      try {
-        const [imgResponse, wordResponse] = await Promise.all([
-          fetch(`${API_BASE}/image/today`),
-          fetch(`${API_BASE}/word/today`),
-        ])
-
-        const img = await imgResponse.json()
-        const word = await wordResponse.json()
-
-        setImageData(img)
-        setWordData(word)
-      } catch (e) {
-        setError("Could not connect to server.")
-      } finally {
-        setLoading(false)
-      }
-    }
-
     fetchToday()
   }, [])
 
@@ -65,6 +74,7 @@ export default function App() {
   return (
     <View style={styles.wrapper}>
       <StatusBar barStyle="light-content" backgroundColor="#0a0a0f" />
+
       {/* fullscreen image modal */}
       <Modal
         visible={modalVisible}
@@ -77,7 +87,7 @@ export default function App() {
           <Image
             source={{ uri: imageData?.url }}
             style={styles.modalImage}
-            resizeMode="contain"   
+            resizeMode="contain"
           />
           <TouchableOpacity
             style={styles.closeButton}
@@ -91,26 +101,34 @@ export default function App() {
       <ScrollView
         contentContainerStyle={styles.container}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#e8c97e"
+            colors={["#e8c97e"]}
+          />
+        }
       >
         {/* date */}
         <Text style={styles.date}>{imageData?.date}</Text>
 
-        {/* tappable image */}
+        {/* tappable image or video notice */}
         {imageData?.media_type === 'image' ? (
           <TouchableOpacity onPress={() => setModalVisible(true)}>
-              <Image
-                  source={{ uri: imageData?.url }}
-                  style={styles.image}
-                  resizeMode="cover"
-              />
-              <Text style={styles.tapHint}>tap to expand</Text>
+            <Image
+              source={{ uri: imageData?.url }}
+              style={styles.image}
+              resizeMode="cover"
+            />
+            <Text style={styles.tapHint}>tap to expand</Text>
           </TouchableOpacity>
-      ) : (
+        ) : (
           <View style={styles.videoContainer}>
-              <Text style={styles.videoNotice}>🎬 Today's APOD is a video</Text>
-              <Text style={styles.videoUrl}>{imageData?.url}</Text>
+            <Text style={styles.videoNotice}>🎬 Today's APOD is a video</Text>
+            <Text style={styles.videoUrl}>{imageData?.url}</Text>
           </View>
-      )}
+        )}
 
         {/* image title */}
         <Text style={styles.imageTitle}>{imageData?.title}</Text>
@@ -252,14 +270,14 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   videoNotice: {
-      color: '#e8c97e',
-      fontSize: 16,
-      marginBottom: 8,
+    color: '#e8c97e',
+    fontSize: 16,
+    marginBottom: 8,
   },
   videoUrl: {
-      color: '#444466',
-      fontSize: 11,
-      textAlign: 'center',
-      paddingHorizontal: 20,
+    color: '#444466',
+    fontSize: 11,
+    textAlign: 'center',
+    paddingHorizontal: 20,
   },
 })
