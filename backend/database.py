@@ -1,6 +1,7 @@
 import psycopg2
 from psycopg2.extras import RealDictCursor
-from datetime import date
+from datetime import date, datetime
+from zoneinfo import ZoneInfo
 from backend.models import ImageResponse, WordResponse
 import os
 
@@ -9,7 +10,7 @@ IMGS_TABLE = "apod_images"
 WORDS_TABLE = "words_dict"
 
 def get_today_image() -> ImageResponse | None:
-    today = date.today().isoformat()
+    today = datetime.now(ZoneInfo("America/Sao_Paulo")).date().isoformat()
     with psycopg2.connect(DATABASE_URL) as conn:
         with conn.cursor(cursor_factory=RealDictCursor) as cursor:
             cursor.execute(
