@@ -154,17 +154,23 @@ def img_to_table(img_otd:dict, table_name:str) -> None:
                     )
                 ''')
 
-                cursor.execute(f'''
-                    INSERT INTO {table_name}
-                        (title, date, explanation, url, copyright, media_type)
-                    VALUES
-                        (%s, %s, %s, %s, %s, %s)
-                    ON CONFLICT DO NOTHING
-                    ''',
-                    (img_otd['title'], img_otd['date'],
-                     img_otd['exp'], img_otd['img_url'],
-                     img_otd['copyr'], img_otd['media_type'])
+                cursor.execute(
+                    f"SELECT 1 FROM {table_name} WHERE date = %s", (img_otd['date'],)
                 )
+                if not cursor.fetchone():
+                    cursor.execute(f'''
+                        INSERT INTO {table_name}
+                            (title, date, explanation, url, copyright, media_type)
+                        VALUES
+                            (%s, %s, %s, %s, %s, %s)
+                        ''',
+                        (img_otd['title'], img_otd['date'],
+                         img_otd['exp'], img_otd['img_url'],
+                         img_otd['copyr'], img_otd['media_type'])
+                    )
+                    print(f"Image '{img_otd['title']}' added to database.")
+                else:
+                    print(f"Image for {img_otd['date']} already exists, skipping.")
 
             except Exception as e:
                 print("Error: ", e)
