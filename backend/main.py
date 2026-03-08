@@ -5,7 +5,7 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 
-# Slowapi added to avoid extreme rates to FastAPI
+# Slowapi added to avoid extreme rates on FastAPI
 
 limiter = Limiter(key_func=get_remote_address)
 app = FastAPI(title="APOD & Word of the Day API")
