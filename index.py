@@ -35,7 +35,6 @@ def send_notification(subject:str, body:str) -> None:
             print(f"Notification failed: {response.status_code}")
     except Exception as e:
         print("Failed to send notification", e)
-        
 
 
 def word_exists(word:str) -> bool:
