@@ -8,8 +8,6 @@ import psycopg2
 from dotenv import load_dotenv
 from random import randint
 import os
-import smtplib
-from email.mime.text import MIMEText
 
 load_dotenv()
 
