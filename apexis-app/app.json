@@ -17,7 +17,7 @@
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/icon.png",
+        "foregroundImage": "./assets/icon.png"
         },
       "package": "com.benaytms.apexis"
     },
