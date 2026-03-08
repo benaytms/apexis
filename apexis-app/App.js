@@ -31,6 +31,14 @@ export default function App() {
         fetch(`${API_BASE}/word/today`),
       ])
 
+      if (!imgResponse.ok) {
+        throw new Error(`Image fetch failed: ${imgResponse.status}`)
+      }
+
+      if (!wordResponse.ok) {
+        throw new Error(`Word fetch failed: ${wordResponse.status}`)
+      }
+
       const img = await imgResponse.json()
       const word = await wordResponse.json()
 
@@ -38,7 +46,7 @@ export default function App() {
       setWordData(word)
       setError(null)
     } catch (e) {
-      setError("Could not connect to server.")
+      setError(e.message || "Could not connect to server")
     } finally {
       setLoading(false)
       setRefreshing(false)
