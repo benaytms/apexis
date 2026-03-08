@@ -1,6 +1,6 @@
 import psycopg2
 from psycopg2.extras import RealDictCursor
-from datetime import date, datetime
+from datetime import datetime
 from zoneinfo import ZoneInfo
 from backend.models import ImageResponse, WordResponse
 import os
