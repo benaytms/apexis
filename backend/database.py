@@ -5,6 +5,11 @@ from zoneinfo import ZoneInfo
 from backend.models import ImageResponse, WordResponse
 import os
 
+# for debugging
+from dotenv import load_dotenv
+load_dotenv()
+
+
 DATABASE_URL = str(os.getenv('DATABASE_URL'))
 IMGS_TABLE = "apod_images"
 WORDS_TABLE = "words_dict"
