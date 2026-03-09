@@ -1,15 +1,8 @@
 from backend.models import ImageResponse, WordResponse
 from psycopg2.extras import RealDictCursor
-from dotenv import load_dotenv
-from datetime import datetime
-from zoneinfo import ZoneInfo
 import psycopg2
-import os
+from config import TODAY, DATABASE_URL
 
-load_dotenv()
-
-TODAY = datetime.now(ZoneInfo("America/Sao_Paulo")).date().isoformat()
-DATABASE_URL = str(os.getenv('DATABASE_URL'))
 IMGS_TABLE = "apod_images"
 WORDS_TABLE = "words_dict"
 

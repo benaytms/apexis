@@ -1,5 +1,4 @@
 from pydantic import BaseModel
-from typing import Optional
 
 class ImageResponse(BaseModel):
     id: int
@@ -7,8 +6,8 @@ class ImageResponse(BaseModel):
     date: str
     explanation: str
     url: str
-    copyright: str='NASA, ESA, CSA, STScI'
-    media_type: str='image'
+    copyright: str
+    media_type: str
 
 class WordResponse(BaseModel):
     id: int

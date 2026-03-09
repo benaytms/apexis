@@ -14,17 +14,11 @@ Last edited: 2026-03-09
 Version: 1.0.2
 """
 
-from dotenv import load_dotenv
-from datetime import datetime
-from zoneinfo import ZoneInfo
 from random import randint
 import requests as rq
 import psycopg2
 import logging
-import os
-
-
-load_dotenv()
+from config import NASA_API, DATABASE_URL, DISCORD_WEBHOOK, TODAY
 
 logging.basicConfig(
     level= logging.INFO,
@@ -32,11 +26,6 @@ logging.basicConfig(
 )
 
 logger = logging.getLogger(__name__)
-
-TODAY = datetime.now(ZoneInfo("America/Sao_Paulo")).date().isoformat()
-NASA_API = str(os.getenv('NASA_API'))
-DATABASE_URL = str(os.getenv('DATABASE_URL'))
-DISCORD_WEBHOOK = str(os.getenv('DISCORD_WEBHOOK'))
 
 APOD_URL = "https://api.nasa.gov/planetary/apod?api_key=" + NASA_API
 DICT_URL = "https://api.dictionaryapi.dev/api/v2/entries/en"
@@ -171,7 +160,7 @@ def img_to_table(img_otd:dict, table_name:str) -> bool:
                         date TEXT UNIQUE NOT NULL,
                         explanation TEXT NOT NULL,
                         url TEXT NOT NULL,
-                        copyright TEXT,
+                        copyright TEXT NOT NULL,
                         media_type TEXT NOT NULL DEFAULT 'image'
                     )
                 ''')
