@@ -11,7 +11,7 @@ Created: 2026-03-06
 
 Last edited: 2026-03-09
 
-Version: 1.0.2
+Version: 1.0.3
 """
 
 from random import randint

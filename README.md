@@ -54,7 +54,7 @@ apexis/
 
 ### Download the APK (android only)
 
-Download the latest APK from the [Releases](https://github.com/benaytms/apexis/releases/tag/1.0.2) page and install it directly.
+Download the latest APK from the [Releases](https://github.com/benaytms/apexis/releases/tag/v.1.0.3) page and install it directly.
 
 > You may need to enable **Install from unknown sources** in your phone's settings.
 
@@ -76,7 +76,7 @@ Download the latest APK from the [Releases](https://github.com/benaytms/apexis/r
 ---
 
 ## Version
-v.1.0.2
+v.1.0.3
 
 ---
 ## License
