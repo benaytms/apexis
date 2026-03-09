@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 620" font-family="monospace, sans-serif">
+
+  <!-- Background -->
+  <rect width="900" height="620" fill="#0a0a0f" rx="12"/>
+
+  <!-- Title -->
+  <text x="450" y="40" text-anchor="middle" fill="#e8c97e" font-size="20" font-weight="bold" letter-spacing="4">APEXIS — ARCHITECTURE</text>
+
+  <!-- ========== EXTERNAL APIS (top left) ========== -->
+  <rect x="40" y="80" width="180" height="50" rx="8" fill="#111122" stroke="#e8c97e" stroke-width="1.5"/>
+  <text x="130" y="100" text-anchor="middle" fill="#e8c97e" font-size="11" font-weight="bold">NASA APOD API</text>
+  <text x="130" y="118" text-anchor="middle" fill="#8888aa" font-size="10">api.nasa.gov</text>
+
+  <rect x="40" y="150" width="180" height="50" rx="8" fill="#111122" stroke="#e8c97e" stroke-width="1.5"/>
+  <text x="130" y="170" text-anchor="middle" fill="#e8c97e" font-size="11" font-weight="bold">Dictionary API</text>
+  <text x="130" y="188" text-anchor="middle" fill="#8888aa" font-size="10">dictionaryapi.dev</text>
+
+  <rect x="40" y="220" width="180" height="50" rx="8" fill="#111122" stroke="#e8c97e" stroke-width="1.5"/>
+  <text x="130" y="240" text-anchor="middle" fill="#e8c97e" font-size="11" font-weight="bold">Random Words API</text>
+  <text x="130" y="258" text-anchor="middle" fill="#8888aa" font-size="10">kushcreates.com</text>
+
+  <!-- ========== CRON JOB (center top) ========== -->
+  <rect x="320" y="120" width="200" height="110" rx="8" fill="#111122" stroke="#444466" stroke-width="1.5"/>
+  <text x="420" y="148" text-anchor="middle" fill="#ffffff" font-size="12" font-weight="bold">index.py</text>
+  <text x="420" y="168" text-anchor="middle" fill="#8888aa" font-size="10">Cron Job — Railway</text>
+  <text x="420" y="188" text-anchor="middle" fill="#8888aa" font-size="10">Daily at 1AM (São Paulo)</text>
+  <text x="420" y="208" text-anchor="middle" fill="#444466" font-size="10">Fetch → Clean → Store</text>
+
+  <!-- ========== POSTGRESQL (center) ========== -->
+  <rect x="320" y="310" width="200" height="90" rx="8" fill="#111122" stroke="#444466" stroke-width="1.5"/>
+  <text x="420" y="338" text-anchor="middle" fill="#ffffff" font-size="12" font-weight="bold">PostgreSQL</text>
+  <text x="420" y="358" text-anchor="middle" fill="#8888aa" font-size="10">Railway — Persistent</text>
+  <text x="420" y="378" text-anchor="middle" fill="#444466" font-size="10">apod_images · words_dict</text>
+
+  <!-- ========== FASTAPI (center bottom) ========== -->
+  <rect x="320" y="475" width="200" height="90" rx="8" fill="#111122" stroke="#444466" stroke-width="1.5"/>
+  <text x="420" y="503" text-anchor="middle" fill="#ffffff" font-size="12" font-weight="bold">FastAPI</text>
+  <text x="420" y="523" text-anchor="middle" fill="#8888aa" font-size="10">Railway — Always On</text>
+  <text x="420" y="543" text-anchor="middle" fill="#444466" font-size="10">/image/today · /word/today</text>
+
+  <!-- ========== DISCORD (right top) ========== -->
+  <rect x="650" y="120" width="180" height="70" rx="8" fill="#111122" stroke="#e8c97e" stroke-width="1.5"/>
+  <text x="740" y="148" text-anchor="middle" fill="#e8c97e" font-size="11" font-weight="bold">Discord</text>
+  <text x="740" y="168" text-anchor="middle" fill="#8888aa" font-size="10">Webhook Notifications</text>
+  <text x="740" y="183" text-anchor="middle" fill="#444466" font-size="10">Success · Warnings · Errors</text>
+
+  <!-- ========== APEXIS APP (right bottom) ========== -->
+  <rect x="650" y="475" width="180" height="90" rx="8" fill="#111122" stroke="#e8c97e" stroke-width="1.5"/>
+  <text x="740" y="503" text-anchor="middle" fill="#e8c97e" font-size="12" font-weight="bold">APEXIS App</text>
+  <text x="740" y="523" text-anchor="middle" fill="#8888aa" font-size="10">React Native · Android</text>
+  <text x="740" y="543" text-anchor="middle" fill="#444466" font-size="10">EAS Build · Expo</text>
+
+  <!-- ========== ARROWS ========== -->
+
+  <!-- NASA → index.py -->
+  <line x1="220" y1="105" x2="318" y2="155" stroke="#e8c97e" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <polygon points="318,155 308,148 312,160" fill="#e8c97e"/>
+
+  <!-- Dictionary → index.py -->
+  <line x1="220" y1="175" x2="318" y2="175" stroke="#e8c97e" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <polygon points="318,175 308,170 308,180" fill="#e8c97e"/>
+
+  <!-- Random Words → index.py -->
+  <line x1="220" y1="245" x2="318" y2="200" stroke="#e8c97e" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <polygon points="318,200 310,208 308,196" fill="#e8c97e"/>
+
+  <!-- index.py → PostgreSQL -->
+  <line x1="420" y1="230" x2="420" y2="308" stroke="#8888aa" stroke-width="1.5"/>
+  <polygon points="420,308 415,298 425,298" fill="#8888aa"/>
+  <text x="432" y="274" fill="#444466" font-size="9">INSERT</text>
+
+  <!-- index.py → Discord -->
+  <line x1="520" y1="165" x2="648" y2="160" stroke="#e8c97e" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <polygon points="648,160 638,155 638,165" fill="#e8c97e"/>
+  <text x="570" y="150" fill="#444466" font-size="9">notify</text>
+
+  <!-- PostgreSQL → FastAPI -->
+  <line x1="420" y1="400" x2="420" y2="473" stroke="#8888aa" stroke-width="1.5"/>
+  <polygon points="420,473 415,463 425,463" fill="#8888aa"/>
+  <text x="432" y="442" fill="#444466" font-size="9">SELECT</text>
+
+  <!-- FastAPI → APEXIS App -->
+  <line x1="520" y1="520" x2="648" y2="520" stroke="#e8c97e" stroke-width="1.5"/>
+  <polygon points="648,520 638,515 638,525" fill="#e8c97e"/>
+  <text x="563" y="510" fill="#444466" font-size="9">JSON</text>
+
+  <!-- ========== RAILWAY BOUNDARY ========== -->
+  <rect x="300" y="95" width="540" height="495" rx="10" fill="none" stroke="#222233" stroke-width="1.5" stroke-dasharray="8,4"/>
+  <text x="570" y="88" text-anchor="middle" fill="#222233" font-size="11" letter-spacing="2">RAILWAY INFRASTRUCTURE</text>
+
+  <!-- ========== LEGEND ========== -->
+  <line x1="40" y1="560" x2="80" y2="560" stroke="#e8c97e" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <text x="90" y="564" fill="#8888aa" font-size="10">External API call</text>
+  <line x1="220" y1="560" x2="260" y2="560" stroke="#8888aa" stroke-width="1.5"/>
+  <text x="270" y="564" fill="#8888aa" font-size="10">Internal data flow</text>
+
+</svg>
