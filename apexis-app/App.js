@@ -65,8 +65,8 @@ export default function App() {
   if (loading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#e8c97e" />
-        <Text style={styles.loadingText}>Loading today's universe...</Text>
+        <ActivityIndicator size="large" color="#ffffff" />
+        <Text style={styles.loadingText}>Loading...</Text>
       </View>
     )
   }
@@ -81,7 +81,7 @@ export default function App() {
 
   return (
     <View style={styles.wrapper}>
-      <StatusBar barStyle="light-content" backgroundColor="#0a0a0f" />
+      <StatusBar barStyle="light-content" backgroundColor="#1a1a1a" />
 
       {/* fullscreen image modal */}
       <Modal
@@ -113,8 +113,8 @@ export default function App() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor="#e8c97e"
-            colors={["#e8c97e"]}
+            tintColor="#ffffff"
+            colors={["#ffffff"]}
           />
         }
       >
@@ -141,6 +141,9 @@ export default function App() {
         {/* image title */}
         <Text style={styles.imageTitle}>{imageData?.title}</Text>
 
+        {/* copyright information */}
+        <Text style={styles.copyright}>© {imageData?.copyr}</Text>
+
         {/* explanation */}
         <Text style={styles.explanation}>{imageData?.explanation}</Text>
 
@@ -161,84 +164,84 @@ export default function App() {
 const styles = StyleSheet.create({
   wrapper: {
     flex: 1,
-    backgroundColor: '#0a0a0f',
+    backgroundColor: '#1a1a1a',
   },
   container: {
-    paddingHorizontal: 20,
-    paddingVertical: 50,
+    paddingHorizontal: 16,
+    paddingVertical: 40,
   },
   centered: {
     flex: 1,
-    backgroundColor: '#0a0a0f',
+    backgroundColor: '#1a1a1a',
     justifyContent: 'center',
     alignItems: 'center',
   },
   loadingText: {
-    color: '#e8c97e',
-    marginTop: 16,
+    color: '#f7e479',
+    marginTop: 12,
     fontSize: 14,
-    letterSpacing: 1,
   },
   errorText: {
-    color: '#ff6b6b',
-    fontSize: 16,
+    color: '#ff4444',
+    fontSize: 15,
     textAlign: 'center',
     paddingHorizontal: 40,
   },
   date: {
-    color: '#e8c97e',
+    color: '#ffd96f',
     fontSize: 12,
-    letterSpacing: 3,
-    marginBottom: 16,
-    textTransform: 'uppercase',
+    marginBottom: 14,
   },
   image: {
-    width: width - 40,
-    height: (width - 40) * 0.65,
-    borderRadius: 8,
+    width: width - 32,
+    height: (width - 32) * 0.65,
+    borderRadius: 4,
     marginBottom: 6,
   },
   tapHint: {
-    color: '#444466',
+    color: '#666666',
     fontSize: 11,
-    letterSpacing: 1,
-    marginBottom: 16,
+    marginBottom: 14,
     textAlign: 'right',
   },
   imageTitle: {
     color: '#ffffff',
-    fontSize: 22,
-    fontWeight: '700',
-    marginBottom: 12,
-    lineHeight: 30,
+    fontSize: 20,
+    fontWeight: '600',
+    marginBottom: 10,
+    lineHeight: 28,
+  },
+  copyright: {
+  color: '#ffd96f',
+  fontSize: 12,
+  marginBottom: 10,
   },
   explanation: {
-    color: '#8888aa',
+    color: '#bbbbbb',
     fontSize: 14,
     lineHeight: 22,
-    marginBottom: 32,
+    marginBottom: 28,
   },
   divider: {
     height: 1,
-    backgroundColor: '#222233',
-    marginBottom: 32,
+    backgroundColor: '#333333',
+    marginBottom: 28,
   },
   wordLabel: {
-    color: '#e8c97e',
+    color: '#ffd96f',
     fontSize: 11,
-    letterSpacing: 3,
     marginBottom: 8,
   },
   word: {
     color: '#ffffff',
-    fontSize: 32,
-    fontWeight: '700',
-    marginBottom: 12,
+    fontSize: 28,
+    fontWeight: '600',
+    marginBottom: 10,
   },
   definition: {
-    color: '#8888aa',
-    fontSize: 15,
-    lineHeight: 24,
+    color: '#bbbbbb',
+    fontSize: 14,
+    lineHeight: 22,
   },
   bottomPadding: {
     height: 60,
@@ -258,32 +261,32 @@ const styles = StyleSheet.create({
     top: 50,
     right: 20,
     backgroundColor: 'rgba(0,0,0,0.6)',
-    borderRadius: 20,
-    width: 40,
-    height: 40,
+    borderRadius: 4,
+    width: 36,
+    height: 36,
     justifyContent: 'center',
     alignItems: 'center',
   },
   closeText: {
     color: '#ffffff',
-    fontSize: 16,
+    fontSize: 15,
   },
   videoContainer: {
-    width: width - 40,
-    height: (width - 40) * 0.65,
-    borderRadius: 8,
-    backgroundColor: '#111122',
+    width: width - 32,
+    height: (width - 32) * 0.65,
+    borderRadius: 4,
+    backgroundColor: '#2a2a2a',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 14,
   },
   videoNotice: {
-    color: '#e8c97e',
-    fontSize: 16,
+    color: '#f7e479',
+    fontSize: 15,
     marginBottom: 8,
   },
   videoUrl: {
-    color: '#444466',
+    color: '#666666',
     fontSize: 11,
     textAlign: 'center',
     paddingHorizontal: 20,

@@ -7,7 +7,7 @@ class ImageResponse(BaseModel):
     date: str
     explanation: str
     url: str
-    copyright: Optional[str]=None
+    copyright: str='NASA, ESA, CSA, STScI'
     media_type: str='image'
 
 class WordResponse(BaseModel):

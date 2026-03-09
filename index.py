@@ -241,9 +241,9 @@ def parse_img_data(img_data:dict) -> dict:
     return {
         "title": img_data.get('title', 'No title'),
         "date": img_data.get('date', '01-01-0001'),
-        "exp": img_data.get('explanation', 'No explanation'),
-        "img_url": img_data.get('url', 'No url'),
-        "copyr": img_data.get('copyright', 'No copyright'),
+        "explanation": img_data.get('explanation', 'No explanation'),
+        "url": img_data.get('url', 'No url'),
+        "copyright": img_data.get('copyright', 'NASA, ESA, CSA, STScI'),
         "media_type": img_data.get('media_type', 'image')
     }
 
