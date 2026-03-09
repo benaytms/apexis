@@ -1,16 +1,39 @@
 """
-Created on Fri Mar 6 23:20:00 2026
+APEXIS - Daily pipeline script
 
-@author: benaytms
+Fetches NASA APOD and a random English word,
+stores them in a Postgresql Database, and sends
+a Discord notification on completion.
+
+Author: Benay Tomas
+
+Created: 2026-03-06
+
+Last edited: 2026-03-09
+
+Version: 1.0.2
 """
+
+from dotenv import load_dotenv
+from datetime import datetime
+from zoneinfo import ZoneInfo
+from random import randint
 import requests as rq
 import psycopg2
-from dotenv import load_dotenv
-from random import randint
+import logging
 import os
+
 
 load_dotenv()
 
+logging.basicConfig(
+    level= logging.INFO,
+    format='%(asctime)s — %(levelname)s — %(message)s'
+)
+
+logger = logging.getLogger(__name__)
+
+TODAY = datetime.now(ZoneInfo("America/Sao_Paulo")).date().isoformat()
 NASA_API = str(os.getenv('NASA_API'))
 DATABASE_URL = str(os.getenv('DATABASE_URL'))
 DISCORD_WEBHOOK = str(os.getenv('DISCORD_WEBHOOK'))
@@ -30,11 +53,11 @@ def send_notification(subject:str, body:str) -> None:
         msg = f"**{subject}**\n\n{body}"
         response = rq.post(DISCORD_WEBHOOK, json={"content": msg})
         if response.status_code == 204:
-            print("Notification sent!")
+            logger.info("Notification sent!")
         else:
-            print(f"Notification failed: {response.status_code}")
+            logger.error(f"Notification failed: {response.status_code}")
     except Exception as e:
-        print("Failed to send notification", e)
+        logger.error(f"Failed to send notification, error: {e}")
 
 
 def word_exists(word:str) -> bool:
@@ -64,15 +87,15 @@ def drop_table(table_name:str) -> None:
         with psycopg2.connect(DATABASE_URL) as conn:
             with conn.cursor() as cursor:
                 cursor.execute(f"DROP TABLE IF EXISTS {table_name};")
-                print(f"Table {table_name} dropped.")
+                logger.warning(f"Table {table_name} dropped.")
 
     except Exception as e:
-        print("An error occurred: ", e)
+        logger.error(f"Could not drop table, error: {e}")
 
 
 def print_table(table_name:str, limit:int = 10) -> None:
     """
-    Prints off specified table for debugging purposes.
+    Prints specified table for debugging purposes.
     """
     try:
         if table_name not in ALLOWED_TABLES:
@@ -82,26 +105,26 @@ def print_table(table_name:str, limit:int = 10) -> None:
             with conn.cursor() as cursor:
                 cursor.execute(f"SELECT * FROM {table_name} LIMIT %s", (limit,))
                 rows = cursor.fetchall()
-                print(f"Table {table_name}:")
+                logger.debug(f"Table {table_name}:")
                 for row in rows:
-                    print(row)
+                    logger.debug(row)
 
     except Exception as e:
-        print("An error occurred: ", e)
+        logger.error(f"Could not print table, error: {e}")
 
 
-def generate_word():
+def generate_word() -> list:
     """
     Generates a random word using the Random Words API, then
     passes it to the Free Dictionary API to get its definition.
     Skips words already in the database.
-    Limit of 120 attempts before falling back to 'default'.
+    Limit of 50 attempts before falling back to 'default'.
     """
-    max_attempts = 120
+    max_attempts = 50
 
     for attempt in range(max_attempts):
 
-        word_response = rq.get(RANDOMWORD_URL, timeout=10)
+        word_response = rq.get(RANDOMWORD_URL, timeout=5)
 
         if word_response.status_code != 200:
             continue
@@ -112,27 +135,26 @@ def generate_word():
             random_word = word_data[n]['word']
 
             if word_exists(random_word):
-                print(f"Word '{random_word}' already in database, trying again...")
+                logger.debug(f"Word '{random_word}' already in database, trying again...")
                 continue
 
-            dict_response = rq.get(f"{DICT_URL}/{random_word}", timeout=10)
+            dict_response = rq.get(f"{DICT_URL}/{random_word}", timeout=5)
             dict_data = dict_response.json()
 
             if isinstance(dict_data, list):
-                print(f"Found valid word: {random_word}")
+                logger.debug(f"Found valid word: {random_word}")
                 return dict_data
             else:
-                print(f"Word '{random_word}' not available, trying again...")
+                logger.info(f"Word '{random_word}' not available, trying again...")
                 continue
 
         except Exception as e:
-            print("Error:", e)
-            continue
+            logger.error(f"Could not generate word, error: {e}")
 
-    return 'default'
+    return ['default']
+        
 
-
-def img_to_table(img_otd:dict, table_name:str) -> None:
+def img_to_table(img_otd:dict, table_name:str) -> bool:
     """
     Inserts APOD information into the images table.
     """
@@ -168,16 +190,17 @@ def img_to_table(img_otd:dict, table_name:str) -> None:
                          img_otd['exp'], img_otd['img_url'],
                          img_otd['copyr'], img_otd['media_type'])
                     )
-                    print(f"Image '{img_otd['title']}' added to database.")
+                    logger.info(f"Image '{img_otd['title']}' added to database.")
+                    return True
                 else:
-                    print(f"Image for {img_otd['date']} already exists, skipping.")
-
+                    logger.info(f"Today's image already in database, skipping.")
+                    return False
             except Exception as e:
-                print("Error: ", e)
+                logger.error(f"Could not insert image to data base, error: {e}")
                 raise
 
 
-def word_to_table(word_otd:dict, table_name:str) -> None:
+def word_to_table(word_otd:dict, table_name:str) -> bool:
     """
     Inserts word information into the words table.
     """
@@ -191,54 +214,31 @@ def word_to_table(word_otd:dict, table_name:str) -> None:
                     CREATE TABLE IF NOT EXISTS {table_name} (
                         id SERIAL PRIMARY KEY,
                         word TEXT UNIQUE NOT NULL,
-                        definition TEXT NOT NULL
+                        definition TEXT NOT NULL,
+                        date TEXT UNIQUE NOT NULL
                     )
                 ''')
 
                 cursor.execute(
-                    f"SELECT 1 FROM {table_name} WHERE word = %s", (word_otd['word'],)
+                    f"SELECT 1 FROM {table_name} WHERE date = %s", (word_otd['date'],)
                 )
                 if not cursor.fetchone():
                     cursor.execute(
-                        f"INSERT INTO {table_name} (word, definition) VALUES (%s, %s)",
-                        (word_otd['word'], word_otd['definition'])
+                        f"INSERT INTO {table_name} (word, definition, date) VALUES (%s, %s, %s)",
+                        (word_otd['word'], word_otd['definition'], word_otd['date'])
                     )
-
+                    logger.info(f"Word {word_otd['word']} added to database.")
+                    return True
+                else:
+                    logger.info(f"Today's word already in database, skipping.")
+                    return False
             except Exception as e:
-                print("Error: ", e)
+                logger.error(f"Failed to insert word to database, error: {e}")
                 raise
 
 
-def main(drop_tables:bool = False) -> None:
-    """
-    Main function — integrates everything into one place.
-    """
-    IMGS_TABLE = ALLOWED_TABLES[0]
-    WORDS_TABLE = ALLOWED_TABLES[1]
-
-    # drop tables if requested
-    if drop_tables:
-        drop_table(IMGS_TABLE)
-        drop_table(WORDS_TABLE)
-        print('All tables dropped!')
-        exit(1)
-
-    # fetch NASA APOD
-    response = rq.get(APOD_URL, timeout=10)
-
-    if response.status_code == 200:
-        img_data = response.json()
-        print("Request successful")
-    else:
-        print("An error occurred: ", response.status_code)
-        send_notification(
-            subject="⚠️ APEXIS Script Failed",
-            body="NASA API request failed."
-        )
-        exit(1)
-
-    # build image dict
-    img_otd = {
+def parse_img_data(img_data:dict) -> dict:
+    return {
         "title": img_data.get('title', 'No title'),
         "date": img_data.get('date', '01-01-0001'),
         "exp": img_data.get('explanation', 'No explanation'),
@@ -247,55 +247,105 @@ def main(drop_tables:bool = False) -> None:
         "media_type": img_data.get('media_type', 'image')
     }
 
-    # save image to database — creates table if it doesn't exist
-    try:
-        img_to_table(img_otd, IMGS_TABLE)
-    except Exception as e:
-        print("Failed to save image to DB:", e)
-        send_notification(
-            subject="⚠️ APEXIS Script Failed",
-            body=f"Failed to save image to database: {e}")
+def parse_word_data(dict_data:list) -> dict:
+    if dict_data[0] == 'default':
+        logger.warning("Could not generate a valid word today, using default.")
+        return {
+            "word": 'default',
+            "definition": 'automatic or standard way of acting or responding.',
+            "date": TODAY
+        }
+        
+    word = dict_data[0].get("word")
+    meanings=dict_data[0]['meanings']
+    definitions = []
+    for meaning in meanings:
+        for definition in meaning['definitions']:
+            definitions.append(definition['definition'])
+    definitions_result = " ; ".join(definitions[:3]).rstrip('.')
+
+    return {
+        "word": word,
+        "definition": definitions_result,
+        "date": TODAY
+    }
+
+
+def main(drop_tables:bool = False) -> None:
+    """
+    Main function — integrates everything into one place.
+    """
+    IMGS_TABLE = ALLOWED_TABLES[0]
+    WORDS_TABLE = ALLOWED_TABLES[1]
+    inserted_img = False
+    inserted_word = False
+
+    # drop ALL tables if requested
+    if drop_tables:
+        drop_table(IMGS_TABLE)
+        drop_table(WORDS_TABLE)
+        logger.warning('All tables dropped!')
         exit(1)
 
+    # fetch NASA APOD
+    response = rq.get(APOD_URL, timeout=10)
+
+    if response.status_code == 200:
+        img_otd = response.json()
+        logger.info("Request successful")
+    else:
+        logger.error(f"An error occurred: {response.status_code}")
+        send_notification(
+            subject="⚠️ APEXIS Script Failed",
+            body="NASA API request failed."
+        )
+        exit(1)
+
+    # build image dict
+    img_otd = parse_img_data(img_otd)
+
+    try:
+        inserted_img = img_to_table(img_otd, IMGS_TABLE)
+    except Exception as e:
+        send_notification(
+            subject="⚠️ APEXIS Script Failed",
+            body=f"Failed to save image to database: {e}"
+        )
+        logger.error(f"Failed to save image to database: {e}")
+        exit(1)
 
     # generate word and save to database
     dict_data = generate_word()
+    word_otd = parse_word_data(dict_data)
 
-    if dict_data == 'default':
-        word_otd = {
-            "word": 'default',
-            "definition": 'automatic or standard way of acting or responding.'
-        }
-        print("Could not generate a valid word today, using default. :(")
+    if word_otd['word'] == 'default':
         send_notification(
             subject="⚠️ APEXIS Script Warning",
-            body="Could not generate a valid word today, using default.")
-    else:
-        word = dict_data[0].get("word")
+            body="Could not generate a valid word today, using default."
+        )
 
-        # put together all definitions in one string
-        meanings=dict_data[0]['meanings']
-        definitions = []
-        for meaning in meanings:
-            for definition in meaning['definitions']:
-                definitions.append(definition['definition'])
-        definitions = definitions[0:3]
-        definitions_result = "; ".join(definitions).rstrip('.')
-        
-        word_otd = {
-            "word": word,
-            "definition": definitions_result
-        }
+    # save image to database — creates table if it doesn't exist
+    try:
+        inserted_word = word_to_table(word_otd, WORDS_TABLE)
+    except Exception as e:
+        send_notification(
+            subject="⚠️ APEXIS Script Failed",
+            body=f"Failed to save word to database: {e}"
+        )
+        logger.error(f"Failed to save word to database: {e}")
+        exit(1)
 
-    word_to_table(word_otd, WORDS_TABLE)
 
     # success notification
-    send_notification(
-        subject="🌌 APEXIS — Today's content is ready",
-        body=f"Image: {img_otd['title']}\nType: {img_otd['media_type']}\n\nWord: {word_otd['word']}\nDefinition: {word_otd['definition']}"
-    )
+    if inserted_word and inserted_img:
+        send_notification(
+            subject="🌌 APEXIS — Today's content is ready",
+            body=f"Image: {img_otd['title']}\nType: {img_otd['media_type']}\n\nWord: {word_otd['word']}\nDefinition: {word_otd['definition']}"
+        )
+    else:
+        logger.info("Skipping notification - Today's content already loaded")
 
 
 if __name__ == "__main__":
-    action = False  # set to True to reset all tables
-    main(action)
+    drop_all_tables = False  # set to True to reset all tables
+    main(drop_all_tables)
