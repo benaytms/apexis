@@ -17,6 +17,11 @@ apexis_journal.txt
 
 apexis-app/.gitignore 
 node_modules/
+apexis-app/app.json
+apexis-app/eas.json
+apexis-app/index.js
+apexis-app/package-lock.json
+apexis-app/package.json
 
 .expo/
 dist/
