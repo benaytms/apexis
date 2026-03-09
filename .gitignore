@@ -1,3 +1,5 @@
+db_scripts/
+.pytest_cache/
 logs/
 images/
 .env

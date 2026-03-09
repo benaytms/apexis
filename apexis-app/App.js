@@ -49,10 +49,12 @@ export default function App() {
       setImageData(img)
       setWordData(word)
       setError(null)
+
     } catch (e) {
       try {
         const cachedImg = await AsyncStorage.getItem('cached_image')
         const cachedWord = await AsyncStorage.getItem('cached_word')
+        
         if (cachedImg && cachedWord) {
           setImageData(JSON.parse(cachedImg))
           setWordData(JSON.parse(cachedWord))
