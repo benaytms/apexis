@@ -110,7 +110,7 @@ def print_table(table_name:str, limit:int = 10) -> None:
         logger.error(f"Could not print table, error: {e}")
 
 
-def generate_word():
+def generate_word() -> list:
     """
     Generates a random word using the Random Words API, then
     passes it to the Free Dictionary API to get its definition.
@@ -148,7 +148,7 @@ def generate_word():
         except Exception as e:
             logger.error(f"Could not generate word, error: {e}")
 
-    return 'default'
+    return ['default']
         
 
 def img_to_table(img_otd:dict, table_name:str) -> bool:
@@ -193,8 +193,8 @@ def img_to_table(img_otd:dict, table_name:str) -> bool:
                     logger.info(f"Today's image already in database, skipping.")
                     return False
             except Exception as e:
-                logger.critical(f"Could not insert image to data base, error: {e}")
-                return False
+                logger.error(f"Could not insert image to data base, error: {e}")
+                raise
 
 
 def word_to_table(word_otd:dict, table_name:str) -> bool:
@@ -230,8 +230,42 @@ def word_to_table(word_otd:dict, table_name:str) -> bool:
                     logger.info(f"Today's word already in database, skipping.")
                     return False
             except Exception as e:
-                logger.critical(f"Failed to insert word to database, error: {e}")
-                return False
+                logger.error(f"Failed to insert word to database, error: {e}")
+                raise
+
+
+def parse_img_data(img_data:dict) -> dict:
+    return {
+        "title": img_data.get('title', 'No title'),
+        "date": img_data.get('date', '01-01-0001'),
+        "exp": img_data.get('explanation', 'No explanation'),
+        "img_url": img_data.get('url', 'No url'),
+        "copyr": img_data.get('copyright', 'No copyright'),
+        "media_type": img_data.get('media_type', 'image')
+    }
+
+def parse_word_data(dict_data:list) -> dict:
+    if dict_data[0] == 'default':
+        logger.warning("Could not generate a valid word today, using default.")
+        return {
+            "word": 'default',
+            "definition": 'automatic or standard way of acting or responding.',
+            "date": TODAY
+        }
+        
+    word = dict_data[0].get("word")
+    meanings=dict_data[0]['meanings']
+    definitions = []
+    for meaning in meanings:
+        for definition in meaning['definitions']:
+            definitions.append(definition['definition'])
+    definitions_result = " ; ".join(definitions[:3]).rstrip('.')
+
+    return {
+        "word": word,
+        "definition": definitions_result,
+        "date": TODAY
+    }
 
 
 def main(drop_tables:bool = False) -> None:
@@ -254,7 +288,7 @@ def main(drop_tables:bool = False) -> None:
     response = rq.get(APOD_URL, timeout=10)
 
     if response.status_code == 200:
-        img_data = response.json()
+        img_otd = response.json()
         logger.info("Request successful")
     else:
         logger.error(f"An error occurred: {response.status_code}")
@@ -265,14 +299,7 @@ def main(drop_tables:bool = False) -> None:
         exit(1)
 
     # build image dict
-    img_otd = {
-        "title": img_data.get('title', 'No title'),
-        "date": img_data.get('date', '01-01-0001'),
-        "exp": img_data.get('explanation', 'No explanation'),
-        "img_url": img_data.get('url', 'No url'),
-        "copyr": img_data.get('copyright', 'No copyright'),
-        "media_type": img_data.get('media_type', 'image')
-    }
+    img_otd = parse_img_data(img_otd)
 
     try:
         inserted_img = img_to_table(img_otd, IMGS_TABLE)
@@ -286,34 +313,13 @@ def main(drop_tables:bool = False) -> None:
 
     # generate word and save to database
     dict_data = generate_word()
+    word_otd = parse_word_data(dict_data)
 
-    if dict_data == 'default':
-        word_otd = {
-            "word": 'default',
-            "definition": 'automatic or standard way of acting or responding.',
-            "date": TODAY
-        }
-        logger.warning("Could not generate a valid word today, using default.")
+    if word_otd['word'] == 'default':
         send_notification(
             subject="⚠️ APEXIS Script Warning",
-            body="Could not generate a valid word today, using default.")
-    else:
-        word = dict_data[0].get("word")
-
-        # put together all definitions in one string
-        meanings=dict_data[0]['meanings']
-        definitions = []
-        for meaning in meanings:
-            for definition in meaning['definitions']:
-                definitions.append(definition['definition'])
-        definitions = definitions[0:3]
-        definitions_result = "; ".join(definitions).rstrip('.')
-        
-        word_otd = {
-            "word": word,
-            "definition": definitions_result,
-            "date": TODAY
-        }
+            body="Could not generate a valid word today, using default."
+        )
 
     # save image to database — creates table if it doesn't exist
     try:
