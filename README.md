@@ -62,3 +62,10 @@ v.1.0.2
 
 MIT
 
+![Python](https://img.shields.io/badge/Python-3.12-blue?logo=python)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.135-009688?logo=fastapi)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Railway-336791?logo=postgresql)
+![React Native](https://img.shields.io/badge/React_Native-Expo-61DAFB?logo=react)
+![Deploy](https://img.shields.io/badge/Deploy-Railway-0B0D0E?logo=railway)
+![License](https://img.shields.io/badge/License-MIT-green)
+
