@@ -1,12 +1,11 @@
-import psycopg2
+from backend.models import ImageResponse, WordResponse
 from psycopg2.extras import RealDictCursor
+from dotenv import load_dotenv
 from datetime import datetime
 from zoneinfo import ZoneInfo
-from backend.models import ImageResponse, WordResponse
+import psycopg2
 import os
 
-# for debugging
-from dotenv import load_dotenv
 load_dotenv()
 
 TODAY = datetime.now(ZoneInfo("America/Sao_Paulo")).date().isoformat()
