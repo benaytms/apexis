@@ -13,15 +13,9 @@ step_by_step.txt
 */__pycache__
 __pycache__
 apexis_journal.txt
-.config.py.swp
 
 apexis-app/.gitignore 
 node_modules/
-apexis-app/app.json
-apexis-app/eas.json
-apexis-app/index.js
-apexis-app/package-lock.json
-apexis-app/package.json
 
 .expo/
 dist/
