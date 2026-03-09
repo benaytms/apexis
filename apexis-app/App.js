@@ -54,7 +54,7 @@ export default function App() {
       try {
         const cachedImg = await AsyncStorage.getItem('cached_image')
         const cachedWord = await AsyncStorage.getItem('cached_word')
-        
+
         if (cachedImg && cachedWord) {
           setImageData(JSON.parse(cachedImg))
           setWordData(JSON.parse(cachedWord))
@@ -184,8 +184,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#1a1a1a',
   },
   container: {
-    paddingHorizontal: 16,
-    paddingVertical: 40,
+    paddingHorizontal: 15,
+    paddingVertical: 15,
   },
   centered: {
     flex: 1,
