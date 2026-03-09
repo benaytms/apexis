@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import {
   View,
   Text,
@@ -42,11 +43,25 @@ export default function App() {
       const img = await imgResponse.json()
       const word = await wordResponse.json()
 
+      await AsyncStorage.setItem('cached_image', JSON.stringify(img))
+      await AsyncStorage.setItem('cached_word', JSON.stringify(word))
+
       setImageData(img)
       setWordData(word)
       setError(null)
     } catch (e) {
-      setError(e.message || "Could not connect to server")
+      try {
+        const cachedImg = await AsyncStorage.getItem('cached_image')
+        const cachedWord = await AsyncStorage.getItem('cached_word')
+        if (cachedImg && cachedWord) {
+          setImageData(JSON.parse(cachedImg))
+          setWordData(JSON.parse(cachedWord))
+        } else {
+          setError("No internet connection and no cached data available.")
+        }
+      } catch {
+        setError(e.message || "Could not connect to server")
+      }
     } finally {
       setLoading(false)
       setRefreshing(false)
@@ -141,8 +156,8 @@ export default function App() {
         {/* image title */}
         <Text style={styles.imageTitle}>{imageData?.title}</Text>
 
-        {/* copyright information */}
-        <Text style={styles.copyright}>© {imageData?.copyr}</Text>
+        {/* copyright */}
+        <Text style={styles.copyright}>{imageData?.copyright}</Text>
 
         {/* explanation */}
         <Text style={styles.explanation}>{imageData?.explanation}</Text>
@@ -212,9 +227,9 @@ const styles = StyleSheet.create({
     lineHeight: 28,
   },
   copyright: {
-  color: '#ffd96f',
-  fontSize: 12,
-  marginBottom: 10,
+    color: '#ffd96f',
+    fontSize: 12,
+    marginBottom: 10,
   },
   explanation: {
     color: '#bbbbbb',

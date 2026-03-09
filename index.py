@@ -187,8 +187,8 @@ def img_to_table(img_otd:dict, table_name:str) -> bool:
                             (%s, %s, %s, %s, %s, %s)
                         ''',
                         (img_otd['title'], img_otd['date'],
-                         img_otd['exp'], img_otd['img_url'],
-                         img_otd['copyr'], img_otd['media_type'])
+                         img_otd['explanation'], img_otd['url'],
+                         img_otd['copyright'], img_otd['media_type'])
                     )
                     logger.info(f"Image '{img_otd['title']}' added to database.")
                     return True
