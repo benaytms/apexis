@@ -28,7 +28,6 @@ def get_today_image() -> ImageResponse | None:
                     f"SELECT * FROM {IMGS_TABLE} ORDER BY date DESC LIMIT 1"
                 )
                 row = cursor.fetchone()
-
     return ImageResponse(**dict(row)) if row else None
 
 def get_today_word() -> WordResponse | None:
