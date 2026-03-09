@@ -26,19 +26,7 @@ Daily script → PostgreSQL → FastAPI → Mobile app
 
 ## Project structure
 
-```
-apexis/
-├── index.py          # Daily pipeline script
-├── backend/
-│   ├── main.py       # FastAPI connect
-│   ├── database.py   # Database queries
-│   └── models.py     # Responses specification (pydantic)
-├── apexis-app/       # React Native mobile app
-│   └── App.js		  # Front end code
-|
-├── Procfile          # Railway start command
-└── requirements.txt  # Requirements specifications for Railway dockerization
-```
+![APEXIS Architecture](apexis-architecture.svg)
 
 ---
 
