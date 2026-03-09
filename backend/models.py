@@ -14,3 +14,4 @@ class WordResponse(BaseModel):
     id: int
     word: str
     definition: str
+    date: str

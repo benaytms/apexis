@@ -7,10 +7,13 @@ import requests as rq
 import psycopg2
 from dotenv import load_dotenv
 from random import randint
+from datetime import datetime
+from zoneinfo import ZoneInfo
 import os
 
 load_dotenv()
 
+TODAY = datetime.now(ZoneInfo("America/Sao_Paulo")).date().isoformat()
 NASA_API = str(os.getenv('NASA_API'))
 DATABASE_URL = str(os.getenv('DATABASE_URL'))
 DISCORD_WEBHOOK = str(os.getenv('DISCORD_WEBHOOK'))
@@ -95,9 +98,9 @@ def generate_word():
     Generates a random word using the Random Words API, then
     passes it to the Free Dictionary API to get its definition.
     Skips words already in the database.
-    Limit of 120 attempts before falling back to 'default'.
+    Limit of 50 attempts before falling back to 'default'.
     """
-    max_attempts = 120
+    max_attempts = 50
 
     for attempt in range(max_attempts):
 
@@ -170,7 +173,7 @@ def img_to_table(img_otd:dict, table_name:str) -> None:
                     )
                     print(f"Image '{img_otd['title']}' added to database.")
                 else:
-                    print(f"Image for {img_otd['date']} already exists, skipping.")
+                    print(f"Today's image already in database, skipping.")
 
             except Exception as e:
                 print("Error: ", e)
@@ -191,19 +194,22 @@ def word_to_table(word_otd:dict, table_name:str) -> None:
                     CREATE TABLE IF NOT EXISTS {table_name} (
                         id SERIAL PRIMARY KEY,
                         word TEXT UNIQUE NOT NULL,
-                        definition TEXT NOT NULL
+                        definition TEXT NOT NULL,
+                        date TEXT UNIQUE NOT NULL
                     )
                 ''')
 
                 cursor.execute(
-                    f"SELECT 1 FROM {table_name} WHERE word = %s", (word_otd['word'],)
+                    f"SELECT 1 FROM {table_name} WHERE date = %s", (word_otd['date'],)
                 )
                 if not cursor.fetchone():
                     cursor.execute(
-                        f"INSERT INTO {table_name} (word, definition) VALUES (%s, %s)",
-                        (word_otd['word'], word_otd['definition'])
+                        f"INSERT INTO {table_name} (word, definition, date) VALUES (%s, %s, %s)",
+                        (word_otd['word'], word_otd['definition'], word_otd['date'])
                     )
-
+                    print(f"Word {word_otd['word']} added to database.")
+                else:
+                    print(f"Today's word already in database, skipping.")
             except Exception as e:
                 print("Error: ", e)
                 raise
@@ -216,7 +222,7 @@ def main(drop_tables:bool = False) -> None:
     IMGS_TABLE = ALLOWED_TABLES[0]
     WORDS_TABLE = ALLOWED_TABLES[1]
 
-    # drop tables if requested
+    # drop ALL tables if requested
     if drop_tables:
         drop_table(IMGS_TABLE)
         drop_table(WORDS_TABLE)
@@ -284,7 +290,8 @@ def main(drop_tables:bool = False) -> None:
         
         word_otd = {
             "word": word,
-            "definition": definitions_result
+            "definition": definitions_result,
+            "date": TODAY
         }
 
     word_to_table(word_otd, WORDS_TABLE)
@@ -297,5 +304,5 @@ def main(drop_tables:bool = False) -> None:
 
 
 if __name__ == "__main__":
-    action = False  # set to True to reset all tables
-    main(action)
+    drop_all_tables = False  # set to True to reset all tables
+    main(drop_all_tables)
