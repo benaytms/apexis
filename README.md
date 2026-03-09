@@ -32,7 +32,18 @@ Daily script → PostgreSQL → FastAPI → Mobile app
 
 ## Project structure
 
-![APEXIS Architecture](apexis-architecture.svg)
+```
+apod_/
+│── index.py              ← main script 
+├── backend/
+│   ├── main.py           ← FastAPI app
+│   ├── database.py       ← DB queries
+│   └── models.py         ← image and word response models for FastAPI
+├── .env
+├── .gitignore
+├── README.md
+└── requirements.txt      ← lists all dependencies
+```
 
 ---
 
