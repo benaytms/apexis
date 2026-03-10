@@ -9,34 +9,35 @@ Author: Benay Tomas
 
 Created: 2026-03-06
 
-Last edited: 2026-03-09
+Last edited: 2026-03-10
 
 Version: 1.0.3
 """
 
-from random import randint
 import requests as rq
 import psycopg2
 import logging
-from config import NASA_API, DATABASE_URL, DISCORD_WEBHOOK, get_today
+from config import DISCORD_WEBHOOK, DATABASE_URL, APOD_URL
+from config import MERRIAM_KEY, NASA_API, get_today
+from wonderwords import RandomWord
 
 logging.basicConfig(
-    level= logging.INFO,
+    level=logging.DEBUG,
     format='%(asctime)s — %(levelname)s — %(message)s'
 )
 
 logger = logging.getLogger(__name__)
 
-APOD_URL = "https://api.nasa.gov/planetary/apod?api_key=" + NASA_API
-DICT_URL = "https://api.dictionaryapi.dev/api/v2/entries/en"
-RANDOMWORD_URL = "https://random-words-api.kushcreates.com/api?language=en"
 
 ALLOWED_TABLES = ("apod_images", "words_dict")
 
 
-def send_notification(subject:str, body:str) -> None:
+# -------------------------------------------------------- NOTIFICAtIONS ------------------------------------------------- #
+############################################################################################################################
+
+def send_notification(subject:str, body:str)->None:
     """
-    Sends an email notification via .
+    Sends a Discord notification via webhook.
     """
     try:
         msg = f"**{subject}**\n\n{body}"
@@ -47,11 +48,18 @@ def send_notification(subject:str, body:str) -> None:
             logger.error(f"Notification failed: {response.status_code}")
     except Exception as e:
         logger.error(f"Failed to send notification, error: {e}")
+        
+############################################################################################################################        
+# -------------------------------------------------------- NOTIFICAtIONS ------------------------------------------------- #
 
 
-def word_exists(word:str) -> bool:
+
+# --------------------------------------------- CHECKS IF WORD IS IN THE DATABASE ----------------------------------------- #
+############################################################################################################################
+
+def word_exists(word:str)->bool:
     """
-    Checks if word is already in the Data Base.
+    Checks if word is already in the database.
     Returns False if table doesn't exist yet.
     """
     try:
@@ -63,11 +71,18 @@ def word_exists(word:str) -> bool:
                 return cursor.fetchone() is not None
     except Exception:
         return False
+        
+############################################################################################################################
+# --------------------------------------------- CHECKS IF WORD IS IN THE DATABASE ----------------------------------------- #
 
 
-def drop_table(table_name:str) -> None:
+
+# ---------------------------------------------------- DROP SPECIFIED TABLE ----------------------------------------------- #
+############################################################################################################################
+
+def drop_table(table_name:str)->None:
     """
-    Drops table from Data Base.
+    Drops table from database.
     """
     try:
         if table_name not in ALLOWED_TABLES:
@@ -75,14 +90,21 @@ def drop_table(table_name:str) -> None:
 
         with psycopg2.connect(DATABASE_URL) as conn:
             with conn.cursor() as cursor:
-                cursor.execute(f"DROP TABLE {table_name};")
+                cursor.execute(f"DROP TABLE IF EXISTS {table_name};")
                 logger.warning(f"Table {table_name} dropped.")
 
     except Exception as e:
         logger.error(f"Could not drop table, error: {e}")
+        
+#############################################################################################################################
+# ----------------------------------------------------- DROP SPECIFIED TABLE ----------------------------------------------- #
 
 
-def print_table(table_name:str, limit:int = 10) -> None:
+
+# ---------------------------------------------------- PRINT SPECIFIED TABLE ----------------------------------------------- #
+#############################################################################################################################
+
+def print_table(table_name:str, limit:int=10)->None:
     """
     Prints specified table for debugging purposes.
     """
@@ -100,50 +122,135 @@ def print_table(table_name:str, limit:int = 10) -> None:
 
     except Exception as e:
         logger.error(f"Could not print table, error: {e}")
+        
+############################################################################################################################
+# ---------------------------------------------------- PRINT SPECIFIED TABLE ----------------------------------------------- #
 
 
-def generate_word() -> list:
+
+# --------------------------------------------------- GENERATES A RANDOM WORD ----------------------------------------------- #
+############################################################################################################################
+
+def generate_random_word()->str|None:
     """
-    Generates a random word using the Random Words API, then
-    passes it to the Free Dictionary API to get its definition.
-    Skips words already in the database.
-    Limit of 50 attempts before falling back to 'default'.
+    Fetches a single random word.
+    Returns the word string or None on failure.
     """
-    max_attempts = 50
+    try:
+        r = RandomWord()
+        return r.random_words()[0]
+    except Exception as e:
+        logger.error(f"Could not generate word, error: {e}")
+        return None
+        
+############################################################################################################################
+# --------------------------------------------------- GENERATES A RANDOM WORD ---------------------------------------------- #
 
-    for attempt in range(max_attempts):
 
-        word_response = rq.get(RANDOMWORD_URL, timeout=5)
 
-        if word_response.status_code != 200:
+# --------------------------------------------------- GET DEFINITION OF WORD ----------------------------------------------- #
+############################################################################################################################
+
+def get_word_definition(word:str)->dict|None:
+    """
+    Fetches definition for a given word from Merriam-Webster.
+    Returns the first entry dict if valid, None if word has no definition.
+    """
+    MERRIAM_URL = f"https://www.dictionaryapi.com/api/v3/references/thesaurus/json/{word}?key={MERRIAM_KEY}"
+
+    try:
+        response = rq.get(MERRIAM_URL, timeout=5)
+        if response.status_code != 200:
+            logger.error(f"Merriam API returned {response.status_code}")
+            return None
+
+        word_data = response.json()
+
+        # valid response is a list where the first element is a dict
+        # if first element is a string or list, word wasn't found
+        if isinstance(word_data[0], str) or isinstance(word_data[0], list):
+            logger.debug(f"No definition found for '{word}'")
+            return None
+
+        return word_data[0]
+
+    except Exception as e:
+        logger.error(f"Could not get word definition, error: {e}")
+        return None
+        
+############################################################################################################################
+# -------------------------------------------------- GET DEFINITION OF WORD ------------------------------------------------ #
+
+
+
+# ----------------------------------------- COORDINATES ALL WORD PROCESSES IN ONE FUNCTION --------------------------------- #
+############################################################################################################################
+
+def word_coordinator()->dict:
+    """
+    Coordinator — generates a random word and fetches its definition.
+    Retries until a valid word+definition pair is found or max attempts reached.
+    Returns a parsed dict with word, definition, synonyms, and today's date.
+    """
+    max_attempts = 10
+
+    for attempt in range(1, max_attempts + 1):
+        logger.info(f"Word validation, attempt: {attempt}/{max_attempts}")
+
+        word = generate_random_word()
+        if not word:
             continue
 
-        try:
-            word_data = word_response.json()
-            n = randint(0, len(word_data) - 1)
-            random_word = word_data[n]['word']
+        if word_exists(word):
+            logger.info(f"'{word}' already in database, skipping")
+            continue
 
-            if word_exists(random_word):
-                logger.debug(f"Word '{random_word}' already in database, trying again...")
-                continue
+        definition_data = get_word_definition(word)
+        if definition_data is None:
+            logger.info(f"'{word}' has no valid definition, skipping")
+            continue
 
-            dict_response = rq.get(f"{DICT_URL}/{random_word}", timeout=5)
-            dict_data = dict_response.json()
+        logger.info(f"Found valid word: {word}")
+        return parse_word_data(definition_data)
 
-            if isinstance(dict_data, list):
-                logger.debug(f"Found valid word: {random_word}")
-                return dict_data
-            else:
-                logger.info(f"Word '{random_word}' not available, trying again...")
-                continue
+    logger.warning("Max attempts reached, using default word")
+    return parse_word_data(None)
+    
+############################################################################################################################
+# ----------------------------------------- COORDINATES ALL WORD PROCESSES IN ONE FUNCTION --------------------------------- #
+    
 
-        except Exception as e:
-            logger.error(f"Could not generate word, error: {e}")
 
-    return ['default']
-        
+# ---------------------------------------------- GET IMAGE FROM APOD URL ------------------------------------------------- #
+############################################################################################################################
 
-def img_to_table(img_otd:dict, table_name:str) -> bool:
+def get_image()->dict|None:
+    """
+    Fetches NASA APOD and returns parsed image dict, or None on failure.
+    """
+    response = rq.get(APOD_URL, timeout=10)
+
+    if response.status_code == 200:
+        img_otd = response.json()
+        logger.info("NASA request successful")
+    else:
+        logger.error(f"NASA API error: {response.status_code}")
+        send_notification(
+            subject="⚠️ APEXIS Script Failed",
+            body="NASA API request failed."
+        )
+        return None
+
+    return parse_img_data(img_otd)
+    
+############################################################################################################################
+# ---------------------------------------------- GET IMAGE FROM APOD URL ------------------------------------------------- #
+
+
+
+# ------------------------------------------------- ADD IMAGE TO APOD DATABASE ---------------------------------------------- # ###############################################################################################################################
+
+def img_to_table(img_otd:dict, table_name:str)->bool:
     """
     Inserts APOD information into the images table.
     """
@@ -182,14 +289,21 @@ def img_to_table(img_otd:dict, table_name:str) -> bool:
                     logger.info(f"Image '{img_otd['title']}' added to database.")
                     return True
                 else:
-                    logger.info(f"Today's image already in database, skipping.")
+                    logger.info("Today's image already in database, skipping.")
                     return False
             except Exception as e:
-                logger.error(f"Could not insert image to data base, error: {e}")
+                logger.error(f"Could not insert image to database, error: {e}")
                 raise
+                
+##############################################################################################################################
+# ------------------------------------------------- ADD IMAGE TO APOD DATABASE ------------------------------------------------ #
 
 
-def word_to_table(word_otd:dict, table_name:str) -> bool:
+    
+# ----------------------------------------------- ADD WORD TO DICTIONARY DATABASE --------------------------------------------- #
+###############################################################################################################################
+
+def word_to_table(word_otd:dict, table_name:str)->bool:
     """
     Inserts word information into the words table.
     """
@@ -204,6 +318,7 @@ def word_to_table(word_otd:dict, table_name:str) -> bool:
                         id SERIAL PRIMARY KEY,
                         word TEXT UNIQUE NOT NULL,
                         definition TEXT NOT NULL,
+                        synonyms TEXT NOT NULL,
                         date TEXT UNIQUE NOT NULL
                     )
                 ''')
@@ -213,20 +328,27 @@ def word_to_table(word_otd:dict, table_name:str) -> bool:
                 )
                 if not cursor.fetchone():
                     cursor.execute(
-                        f"INSERT INTO {table_name} (word, definition, date) VALUES (%s, %s, %s)",
-                        (word_otd['word'], word_otd['definition'], word_otd['date'])
+                        f"INSERT INTO {table_name} (word, definition, synonyms, date) VALUES (%s, %s, %s, %s)",
+                        (word_otd['word'], word_otd['definition'], word_otd['synonyms'], word_otd['date'])
                     )
-                    logger.info(f"Word {word_otd['word']} added to database.")
+                    logger.info(f"Word '{word_otd['word']}' added to database.")
                     return True
                 else:
-                    logger.info(f"Today's word already in database, skipping.")
+                    logger.info("Today's word already in database, skipping.")
                     return False
             except Exception as e:
                 logger.error(f"Failed to insert word to database, error: {e}")
                 raise
+                
+###############################################################################################################################
+# ----------------------------------------------- ADD WORD TO DICTIONARY DATABASE --------------------------------------------- #
 
 
-def parse_img_data(img_data:dict) -> dict:
+
+# ---------------------------------------------------- PARSE IMAGE DATA ------------------------------------------------------- #
+###############################################################################################################################
+
+def parse_img_data(img_data:dict)->dict:
     return {
         "title": img_data.get('title', 'No title'),
         "date": img_data.get('date', '01-01-0001'),
@@ -235,32 +357,58 @@ def parse_img_data(img_data:dict) -> dict:
         "copyright": img_data.get('copyright', 'NASA, ESA, CSA, STScI'),
         "media_type": img_data.get('media_type', 'image')
     }
+    
+###############################################################################################################################
+# ---------------------------------------------------- PARSE IMAGE DATA ------------------------------------------------------- #
 
-def parse_word_data(dict_data:list) -> dict:
-    if dict_data[0] == 'default':
+
+
+# ---------------------------------------------------- PARSE WORD DATA -------------------------------------------------------- #
+###############################################################################################################################
+
+def parse_word_data(entry:dict|None)->dict:
+    """
+    Parses a Merriam-Webster thesaurus entry dict into a flat word dict.
+    If entry is None, returns a default fallback word.
+    """
+    if entry is None:
         logger.warning("Could not generate a valid word today, using default.")
         return {
-            "word": 'default',
-            "definition": 'automatic or standard way of acting or responding.',
+            "word": "default",
+            "definition": "A situation or condition that obtains in the absence of active intervention; absence of choice.",
+            "synonyms": "neglect; absence; failure",
             "date": get_today()
         }
+
+    word = entry['hwi']['hw']
+    try:
+        # def -> sseq -> sense -> dt
+        definition = entry['def'][0]['sseq'][0][0][1]['dt'][0][1]
         
-    word = dict_data[0].get("word")
-    meanings=dict_data[0]['meanings']
-    definitions = []
-    for meaning in meanings:
-        for definition in meaning['definitions']:
-            definitions.append(definition['definition'])
-    definitions_result = " ; ".join(definitions[:3]).rstrip('.')
+        syn_list = entry['def'][0]['sseq'][0][0][1]['syn_list'][0][:4]
+        syns = '; '.join(i['wd'] for i in syn_list)
+        
+    except (KeyError, IndexError) as e:
+        logger.warning(f"Could not parse word entry structure: {e}")
+        logger.debug(f"Word structure: {entry}")
+        return parse_word_data(None)
 
     return {
         "word": word,
-        "definition": definitions_result,
+        "definition": definition,
+        "synonyms": syns,
         "date": get_today()
     }
+    
+###############################################################################################################################
+# ---------------------------------------------------- PARSE WORD DATA -------------------------------------------------------- #
 
 
-def main(drop_tables:bool = False) -> None:
+
+# ------------------------------------------------------- MAIN FUNCTION ------------------------------------------------------- #
+###############################################################################################################################
+
+def main(drop_tables:bool=False)->None:
     """
     Main function — integrates everything into one place.
     """
@@ -269,30 +417,18 @@ def main(drop_tables:bool = False) -> None:
     inserted_img = False
     inserted_word = False
 
-    # drop ALL tables if requested
     if drop_tables:
         drop_table(IMGS_TABLE)
         drop_table(WORDS_TABLE)
         logger.warning('All tables dropped!')
         exit(1)
 
-    # fetch NASA APOD
-    response = rq.get(APOD_URL, timeout=10)
-
-    if response.status_code == 200:
-        img_otd = response.json()
-        logger.info("Request successful")
-    else:
-        logger.error(f"An error occurred: {response.status_code}")
-        send_notification(
-            subject="⚠️ APEXIS Script Failed",
-            body="NASA API request failed."
-        )
+    
+    img_otd = get_image()
+    if img_otd is None:
         exit(1)
-
-    # build image dict
-    img_otd = parse_img_data(img_otd)
-
+        
+    # adds image to table
     try:
         inserted_img = img_to_table(img_otd, IMGS_TABLE)
     except Exception as e:
@@ -303,17 +439,10 @@ def main(drop_tables:bool = False) -> None:
         logger.error(f"Failed to save image to database: {e}")
         exit(1)
 
-    # generate word and save to database
-    dict_data = generate_word()
-    word_otd = parse_word_data(dict_data)
 
-    if word_otd['word'] == 'default':
-        send_notification(
-            subject="⚠️ APEXIS Script Warning",
-            body="Could not generate a valid word today, using default."
-        )
-
-    # save image to database — creates table if it doesn't exist
+    
+    word_otd = word_coordinator()
+    # adds word to table
     try:
         inserted_word = word_to_table(word_otd, WORDS_TABLE)
     except Exception as e:
@@ -324,8 +453,7 @@ def main(drop_tables:bool = False) -> None:
         logger.error(f"Failed to save word to database: {e}")
         exit(1)
 
-
-    # success notification
+    # if both word and image were inserted correctly, sends notification
     if inserted_word and inserted_img:
         send_notification(
             subject="🌌 APEXIS — Today's content is ready",
@@ -333,8 +461,15 @@ def main(drop_tables:bool = False) -> None:
         )
     else:
         logger.info("Skipping notification - Today's content already loaded")
+        
+################################################################################################################################
+# ------------------------------------------------------- MAIN FUNCTION ------------------------------------------------------- #
 
+
+
+# --------------------------------------------------------- MAIN CALLER -------------------------------------------------------------- #
+###############################################################################################################################
 
 if __name__ == "__main__":
-    drop_tables = False
-    main(drop_tables)
+    drop_all_tables = False  # set to True to reset all tables
+    main(drop_all_tables)
