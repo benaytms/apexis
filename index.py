@@ -27,7 +27,6 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-TODAY = get_today()
 APOD_URL = "https://api.nasa.gov/planetary/apod?api_key=" + NASA_API
 DICT_URL = "https://api.dictionaryapi.dev/api/v2/entries/en"
 RANDOMWORD_URL = "https://random-words-api.kushcreates.com/api?language=en"
@@ -243,7 +242,7 @@ def parse_word_data(dict_data:list) -> dict:
         return {
             "word": 'default',
             "definition": 'automatic or standard way of acting or responding.',
-            "date": TODAY
+            "date": get_today()
         }
         
     word = dict_data[0].get("word")
@@ -257,7 +256,7 @@ def parse_word_data(dict_data:list) -> dict:
     return {
         "word": word,
         "definition": definitions_result,
-        "date": TODAY
+        "date": get_today()
     }
 
 
