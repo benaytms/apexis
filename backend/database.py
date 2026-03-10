@@ -1,10 +1,11 @@
 from backend.models import ImageResponse, WordResponse
 from psycopg2.extras import RealDictCursor
 import psycopg2
-from config import TODAY, DATABASE_URL
+from config import DATABASE_URL, get_today()
 
 IMGS_TABLE = "apod_images"
 WORDS_TABLE = "words_dict"
+TODAY = get_today()
 
 def get_today_image() -> ImageResponse | None:
     with psycopg2.connect(DATABASE_URL) as conn:
