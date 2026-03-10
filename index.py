@@ -18,7 +18,7 @@ from random import randint
 import requests as rq
 import psycopg2
 import logging
-from config import NASA_API, DATABASE_URL, DISCORD_WEBHOOK, get_today()
+from config import NASA_API, DATABASE_URL, DISCORD_WEBHOOK, get_today
 
 logging.basicConfig(
     level= logging.INFO,
