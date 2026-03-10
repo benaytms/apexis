@@ -18,7 +18,7 @@ import requests as rq
 import psycopg2
 import logging
 from config import DISCORD_WEBHOOK, DATABASE_URL, APOD_URL
-from config import MERRIAM_KEY, NASA_API, get_today
+from config import MERRIAM_KEY, get_today
 from wonderwords import RandomWord
 
 logging.basicConfig(
