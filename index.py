@@ -380,13 +380,13 @@ def parse_word_data(entry:dict|None)->dict:
             "date": get_today()
         }
 
-    word = entry['hwi']['hw']
+    word = entry['hwi']['hw'].capitalize()
     try:
         # def -> sseq -> sense -> dt
-        definition = entry['def'][0]['sseq'][0][0][1]['dt'][0][1]
+        definition = entry['def'][0]['sseq'][0][0][1]['dt'][0][1].capitalize()
         
         syn_list = entry['def'][0]['sseq'][0][0][1]['syn_list'][0][:4]
-        syns = '; '.join(i['wd'] for i in syn_list)
+        syns = '; '.join(i['wd'] for i in syn_list).capitalize()
         
     except (KeyError, IndexError) as e:
         logger.warning(f"Could not parse word entry structure: {e}")

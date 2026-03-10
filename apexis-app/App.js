@@ -98,7 +98,7 @@ export default function App() {
 
   return (
     <View style={styles.wrapper}>
-      <StatusBar barStyle="light-content" backgroundColor="#1a1a1a" />
+      <StatusBar barStyle="light-content" backgroundColor="#070816" />
 
       {/* fullscreen image modal */}
       <Modal
@@ -138,6 +138,9 @@ export default function App() {
         {/* date */}
         <Text style={styles.date}>{imageData?.date}</Text>
 
+        {/* image title */}
+        <Text style={styles.imageTitle}>{imageData?.title}</Text>
+
         {/* tappable image or video notice */}
         {imageData?.media_type === 'image' ? (
           <TouchableOpacity onPress={() => setModalVisible(true)}>
@@ -155,9 +158,6 @@ export default function App() {
           </View>
         )}
 
-        {/* image title */}
-        <Text style={styles.imageTitle}>{imageData?.title}</Text>
-
         {/* copyright */}
         <Text style={styles.copyright}>{imageData?.copyright}</Text>
 
@@ -172,6 +172,10 @@ export default function App() {
         <Text style={styles.word}>{wordData?.word}</Text>
         <Text style={styles.definition}>{wordData?.definition}</Text>
 
+        {/* synonyms */}
+        <Text style={styles.synonymsLabel}>SYNONYMS</Text>
+        <Text style={styles.synonyms}>{wordData?.synonyms}</Text>
+
         <View style={styles.bottomPadding} />
       </ScrollView>
     </View>
@@ -181,7 +185,7 @@ export default function App() {
 const styles = StyleSheet.create({
   wrapper: {
     flex: 1,
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#070816',
   },
   container: {
     paddingHorizontal: 15,
@@ -247,15 +251,26 @@ const styles = StyleSheet.create({
   wordLabel: {
     color: '#ffd96f',
     fontSize: 11,
-    marginBottom: 8,
+    marginBottom: 5,
   },
   word: {
     color: '#ffffff',
-    fontSize: 28,
+    fontSize: 20,
     fontWeight: '600',
-    marginBottom: 10,
+    marginBottom: 5,
   },
   definition: {
+    color: '#bbbbbb',
+    fontSize: 14,
+    lineHeight: 22,
+    marginBottom: 24,
+  },
+  synonymsLabel: {
+    color: '#ffd96f',
+    fontSize: 11,
+    marginBottom: 8,
+  },
+  synonyms: {
     color: '#bbbbbb',
     fontSize: 14,
     lineHeight: 22,
