@@ -18,7 +18,7 @@ from random import randint
 import requests as rq
 import psycopg2
 import logging
-from config import NASA_API, DATABASE_URL, DISCORD_WEBHOOK, TODAY
+from config import NASA_API, DATABASE_URL, DISCORD_WEBHOOK, get_today()
 
 logging.basicConfig(
     level= logging.INFO,
@@ -27,6 +27,7 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
+TODAY = get_today()
 APOD_URL = "https://api.nasa.gov/planetary/apod?api_key=" + NASA_API
 DICT_URL = "https://api.dictionaryapi.dev/api/v2/entries/en"
 RANDOMWORD_URL = "https://random-words-api.kushcreates.com/api?language=en"
