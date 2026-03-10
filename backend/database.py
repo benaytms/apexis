@@ -5,14 +5,14 @@ from config import DATABASE_URL, get_today()
 
 IMGS_TABLE = "apod_images"
 WORDS_TABLE = "words_dict"
-TODAY = get_today()
 
 def get_today_image() -> ImageResponse | None:
+    today = get_today()
     with psycopg2.connect(DATABASE_URL) as conn:
         with conn.cursor(cursor_factory=RealDictCursor) as cursor:
             # try today first
             cursor.execute(
-                f"SELECT * FROM {IMGS_TABLE} WHERE date = %s", (TODAY,)
+                f"SELECT * FROM {IMGS_TABLE} WHERE date = %s", (today,)
             )
             row = cursor.fetchone()
             
@@ -25,10 +25,11 @@ def get_today_image() -> ImageResponse | None:
     return ImageResponse(**dict(row)) if row else None
 
 def get_today_word() -> WordResponse | None:
+    today = get_today()
     with psycopg2.connect(DATABASE_URL) as conn:
         with conn.cursor(cursor_factory=RealDictCursor) as cursor:
             cursor.execute(
-                f"SELECT * FROM {WORDS_TABLE} WHERE date = %s", (TODAY,)
+                f"SELECT * FROM {WORDS_TABLE} WHERE date = %s", (today,)
             )
             row = cursor.fetchone()
 
