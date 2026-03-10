@@ -13,4 +13,5 @@ class WordResponse(BaseModel):
     id: int
     word: str
     definition: str
+    synonyms: str
     date: str
