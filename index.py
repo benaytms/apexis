@@ -75,7 +75,7 @@ def drop_table(table_name:str) -> None:
 
         with psycopg2.connect(DATABASE_URL) as conn:
             with conn.cursor() as cursor:
-                cursor.execute(f"DROP TABLE IF EXISTS {table_name};")
+                cursor.execute(f"DROP TABLE {table_name};")
                 logger.warning(f"Table {table_name} dropped.")
 
     except Exception as e:
@@ -336,5 +336,5 @@ def main(drop_tables:bool = False) -> None:
 
 
 if __name__ == "__main__":
-    drop_all_tables = False  # set to True to reset all tables
-    main(drop_all_tables)
+    drop_tables = False
+    main(drop_tables)
