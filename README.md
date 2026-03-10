@@ -63,8 +63,7 @@ Download the latest APK from the [Releases](https://github.com/benaytms/apexis/r
 ## APIs used
 
 - [NASA APOD API](https://api.nasa.gov/) — Astronomy Picture of the Day
-- [Free Dictionary API](https://dictionaryapi.dev/) — Word definitions
-- [Random Words API](https://random-words-api.kushcreates.com/) — Random English words
+- [Merriam-Webster API](https://dictionaryapi.com/)- Word dictionary
 
 ---
 
