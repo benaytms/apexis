@@ -21,13 +21,13 @@ test_apexis() {
 
 run_pipeline() {
 	cd "$APEXIS_ROOT" &&
-	source "/home/betomate/venv/bin/activate" &&
+	source "$HOME/venv/bin/activate" &&
 	python index.py
 }
 
 run_backend() {
 	cd "$APEXIS_ROOT" &&
-	source "/home/betomate/venv/bin/activate" &&
+	source "$HOME/venv/bin/activate" &&
 	uvicorn backend.main:app --reload
 }
 
