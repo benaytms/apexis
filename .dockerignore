@@ -1,0 +1,12 @@
+.git
+.env
+__pycache__
+*.pyc
+.ipynb_checkpoints
+apexis-app
+logs
+images
+*.jpg
+*.jpeg
+apexis_journal.txt
+step_by_step.txt
