@@ -227,21 +227,33 @@ def word_coordinator()->dict:
 def get_image()->dict|None:
     """
     Fetches NASA APOD and returns parsed image dict, or None on failure.
+    Retries up to 3 times on server errors before giving up.
     """
-    response = rq.get(APOD_URL, timeout=10)
+    max_attempts = 3
 
-    if response.status_code == 200:
-        img_otd = response.json()
-        logger.info("NASA request successful")
-    else:
-        logger.error(f"NASA API error: {response.status_code}")
-        send_notification(
-            subject="⚠️ APEXIS Script Failed",
-            body="NASA API request failed."
-        )
-        return None
+    for attempt in range(1, max_attempts + 1):
+        logger.info(f"NASA request attempt {attempt}/{max_attempts}")
+        try:
+            response = rq.get(APOD_URL, timeout=10)
+            if response.status_code == 200:
+                logger.info("NASA request successful")
+                return parse_img_data(response.json())
+            elif response.status_code >= 500:
+                logger.warning(f"NASA API server error: {response.status_code}, retrying...")
+                continue
+            else:
+                # 4xx errors won't be fixed by retrying (bad key, bad URL, etc.)
+                logger.error(f"NASA API client error: {response.status_code}")
+                break
+        except Exception as e:
+            logger.error(f"NASA request failed: {e}")
+            continue
 
-    return parse_img_data(img_otd)
+    send_notification(
+        subject="⚠️ APEXIS Script Failed",
+        body="NASA API request failed after all attempts."
+    )
+    return None
     
 ############################################################################################################################
 # ---------------------------------------------- GET IMAGE FROM APOD URL ------------------------------------------------- #
