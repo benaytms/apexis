@@ -67,11 +67,6 @@ Download the latest APK from the [Releases](https://github.com/benaytms/apexis/r
 
 ---
 
-## Planned for next updates
-- Translation to multiple languages
-
----
-
 ## Version
 v.1.0.3
 
