@@ -13,7 +13,7 @@ Built with Python, FastAPI, PostgreSQL (previously sqlite3), and React Native.
 ---
 
 ## Apexis Example
-<img src="example.jpeg" alt="app_example" width="350" height="700">
+<img src="example2.jpeg" alt="app_example" width="350" height="700">
 
 ---
 
