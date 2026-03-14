@@ -82,7 +82,7 @@ Download the latest APK from the [Releases](https://github.com/benaytms/apexis/r
    ```bash
    docker compose up --build
    ```
-4. The endpoints will be available at http://localhost:8000
+4. The endpoints will be available at http://localhost:8000/docs
 
 ### Services
 | Service | Description |
