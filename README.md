@@ -3,6 +3,7 @@
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Railway-336791?logo=postgresql)
 ![React Native](https://img.shields.io/badge/React_Native-Expo-61DAFB?logo=react)
 ![Deploy](https://img.shields.io/badge/Deploy-Railway-0B0D0E?logo=railway)
+![Docker](https://img.shields.io/badge/Docker-2596ED?style=flat&logo=docker&logoColor=white)
 
 # APEXIS
 
@@ -59,6 +60,44 @@ apexis/
 Download the latest APK from the [Releases](https://github.com/benaytms/apexis/releases/tag/v.1.0.3) page and install it directly.
 
 > You may need to enable **Install from unknown sources** in your phone's settings.
+
+---
+
+## Running locally
+
+### Prerequisites
+- [Docker](https://docs.docker.com/get-started/get-docker/)
+- [Docker Compose](https://docs.docker.com/compose/install/)
+- API keys for [Nasa](https://api.nasa.gov/), [Merriam-Webster Dictionary](https://dictionaryapi.com/)
+- Discord Server and [Webhook](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks)
+
+### Setup
+1. Clone the repository
+   ```bash
+   git clone https://github.com/benaytms/apexis.git
+   cd apexis
+   ```
+2. Create your own '.env' with your own keys (follow the example)
+3. Start it up
+   ```bash
+   docker compose up --build
+   ```
+4. The endpoints will be available at http://localhost:8000
+
+### Services
+| Service | Description |
+|---|---|
+|`api`| FastAPI server on port 8000 |
+|`cron`| Daily pipeline - runs at 06:00 UTC (03:00 BRT) |
+|`db`| PostgreSQL on port 5433 |
+
+### Useful commands
+```bash
+docker compose up --build -d    # Run in the backgourd
+docker compose logs -f          # Follow logs
+docker compose down             # Stops the container
+docker container prune          # Removes all stopped containers
+```
 
 ---
 
