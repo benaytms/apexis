@@ -16,6 +16,7 @@ Built with Python, FastAPI, PostgreSQL (previously sqlite3), and React Native.
 <p align="center">
   <img src="example2.jpeg" alt="app_example" width="350" height="700">
 </p>
+
 ---
 
 ## How it works
