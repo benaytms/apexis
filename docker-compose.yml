@@ -11,8 +11,9 @@ services:
       - db
 
   cron:
-    build: .
-    command: python scheduler.py
+    build:
+      context: .
+      dockerfile: Dockerfile.cron
     env_file:
       - .env
     environment:
