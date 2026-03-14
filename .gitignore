@@ -15,6 +15,9 @@ step_by_step.txt
 __pycache__
 apexis_journal.txt
 
+# Docker
+postgres_data/
+
 apexis-app/.gitignore 
 node_modules/
 
