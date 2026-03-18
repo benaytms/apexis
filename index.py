@@ -383,7 +383,6 @@ def parse_word_data(entry:dict|None)->dict:
     Parses a Merriam-Webster thesaurus entry dict into a flat word dict.
     If entry is None, returns a default fallback word.
     """
-    print(type(entry))
     if entry is None:
         logger.warning("Could not generate a valid word today, using default.")
         return {
