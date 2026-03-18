@@ -483,7 +483,5 @@ def main(drop_tables:bool=False)->None:
 ###############################################################################################################################
 
 if __name__ == "__main__":
-    #drop_all_tables = False  # set to True to reset all tables
-    #main(drop_all_tables)
-    word_info = get_word_definition('candles')
-    pass
+    drop_all_tables = False  # set to True to reset all tables
+    main(drop_all_tables)
