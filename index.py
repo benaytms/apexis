@@ -383,6 +383,7 @@ def parse_word_data(entry:dict|None)->dict:
     Parses a Merriam-Webster thesaurus entry dict into a flat word dict.
     If entry is None, returns a default fallback word.
     """
+    print(type(entry))
     if entry is None:
         logger.warning("Could not generate a valid word today, using default.")
         return {
@@ -392,13 +393,12 @@ def parse_word_data(entry:dict|None)->dict:
             "date": get_today()
         }
 
-    word = entry['hwi']['hw'].capitalize()
+    word = entry['meta']['id'].capitalize()
     try:
-        # def -> sseq -> sense -> dt
-        definition = entry['def'][0]['sseq'][0][0][1]['dt'][0][1].capitalize()
+        definition = entry['shortdef'][0].capitalize()
         
-        syn_list = entry['def'][0]['sseq'][0][0][1]['syn_list'][0][:4]
-        syns = '; '.join(i['wd'] for i in syn_list).capitalize()
+        syn_list = entry['meta']['syns'][0][:3]
+        syns = '; '.join(i for i in syn_list).capitalize()
         
     except (KeyError, IndexError) as e:
         logger.warning(f"Could not parse word entry structure: {e}")
@@ -483,5 +483,7 @@ def main(drop_tables:bool=False)->None:
 ###############################################################################################################################
 
 if __name__ == "__main__":
-    drop_all_tables = False  # set to True to reset all tables
-    main(drop_all_tables)
+    #drop_all_tables = False  # set to True to reset all tables
+    #main(drop_all_tables)
+    word_info = get_word_definition('candles')
+    pass
