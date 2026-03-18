@@ -22,13 +22,13 @@ test_apexis() {
 run_pipeline() {
 	cd "$APEXIS_ROOT" &&
 	source "$HOME/venv/bin/activate" &&
-	python index.py
+	uv run python index.py
 }
 
 run_backend() {
 	cd "$APEXIS_ROOT" &&
 	source "$HOME/venv/bin/activate" &&
-	uvicorn backend.main:app --reload
+	uv run uvicorn backend.main:app --reload
 }
 
 if [[ -z "$1" ]]; then
