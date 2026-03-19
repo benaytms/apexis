@@ -22,7 +22,7 @@ from config import MERRIAM_KEY, get_today
 from wonderwords import RandomWord
 
 logging.basicConfig(
-    level=logging.DEBUG,
+    level=logging.INFO,
     format='%(asctime)s — %(levelname)s — %(message)s'
 )
 
@@ -236,16 +236,13 @@ def get_image()->dict|None:
         try:
             response = rq.get(APOD_URL, timeout=10)
             if response.status_code == 200:
-                raw = response.json()
-                logger.debug(f"Raw NASA explanation: {repr(raw.get('explanation', ''))}")
                 logger.info("NASA request successful")
-                return parse_img_data(raw)
-                # return parse_img_data(response.json())
+                return parse_img_data(response.json())
             elif response.status_code >= 500:
                 logger.warning(f"NASA API server error: {response.status_code}, retrying...")
                 continue
             else:
-                # 4xx errors won't be fixed by retrying (bad key, bad URL, etc.)
+                # 400 type errors won't be fixed by retrying
                 logger.error(f"NASA API client error: {response.status_code}")
                 break
         except Exception as e:
@@ -364,7 +361,6 @@ def word_to_table(word_otd:dict, table_name:str)->bool:
 ###############################################################################################################################
 
 def parse_img_data(img_data:dict)->dict:
-    logger.debug(f"Raw explanation: {repr(img_data.get('explanation', ''))}")
     return {
         "title": img_data.get('title', 'No title'),
         "date": img_data.get('date', '01-01-0001'),
