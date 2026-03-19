@@ -394,10 +394,10 @@ def parse_word_data(entry:dict|None)->dict:
 
     word = entry['meta']['id'].capitalize()
     try:
-        definition = entry['shortdef'][0].capitalize()
+        definition = entry['shortdef'][0].strip().capitalize()
         
         syn_list = entry['meta']['syns'][0][:3]
-        syns = '; '.join(i for i in syn_list).capitalize()
+        syns = '; '.join(i.strip() for i in syn_list).capitalize()
         
     except (KeyError, IndexError) as e:
         logger.warning(f"Could not parse word entry structure: {e}")
