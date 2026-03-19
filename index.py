@@ -361,6 +361,7 @@ def word_to_table(word_otd:dict, table_name:str)->bool:
 ###############################################################################################################################
 
 def parse_img_data(img_data:dict)->dict:
+    logger.debug(f"Raw explanation: {repr(img_data.get('explanation', ''))}")
     return {
         "title": img_data.get('title', 'No title'),
         "date": img_data.get('date', '01-01-0001'),
