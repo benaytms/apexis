@@ -236,8 +236,11 @@ def get_image()->dict|None:
         try:
             response = rq.get(APOD_URL, timeout=10)
             if response.status_code == 200:
+                raw = response.json()
+                logger.debug(f"Raw NASA explanation: {repr(raw.get('explanation', ''))}")
                 logger.info("NASA request successful")
-                return parse_img_data(response.json())
+                return parse_img_data(raw)
+                # return parse_img_data(response.json())
             elif response.status_code >= 500:
                 logger.warning(f"NASA API server error: {response.status_code}, retrying...")
                 continue
