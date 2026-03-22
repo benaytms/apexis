@@ -10,14 +10,11 @@ images/
 .cache
 *.db-journal
 *.db
-step_by_step.txt
 */__pycache__
 __pycache__
-apexis_journal.txt
 *.cron
-
 test_build.sh
-requirements.txt
+text_files
 
 
 # Docker
