@@ -392,7 +392,7 @@ def parse_word_data(entry:dict|None)->dict:
             "date": get_today()
         }
 
-    word = entry['meta']['id'].capitalize()
+    word = entry['hwi']['hw'].capitalize()
     try:
         definition = entry['shortdef'][0].capitalize()
         

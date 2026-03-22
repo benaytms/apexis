@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import {
   View,
   Text,
+  Linking,
   Image,
   ScrollView,
   ActivityIndicator,
@@ -136,10 +137,10 @@ export default function App() {
         }
       >
         {/* date */}
-        <Text style={styles.date}>{imageData?.date}</Text>
+        <Text selectable style={styles.date}>{imageData?.date}</Text>
 
         {/* image title */}
-        <Text style={styles.imageTitle}>{imageData?.title}</Text>
+        <Text selectable style={styles.imageTitle}>{imageData?.title}</Text>
 
         {/* tappable image or video notice */}
         {imageData?.media_type === 'image' ? (
@@ -154,27 +155,29 @@ export default function App() {
         ) : (
           <View style={styles.videoContainer}>
             <Text style={styles.videoNotice}>🎬 Today's APOD is a video</Text>
-            <Text style={styles.videoUrl}>{imageData?.url}</Text>
+            <TouchableOpacity onPress={() => imageData?.url && Linking.openURL(imageData.url)}>
+              <Text style={styles.videoUrl}>Watch on NASA ↗</Text>
+            </TouchableOpacity>
           </View>
         )}
 
         {/* copyright */}
-        <Text style={styles.copyright}>{imageData?.copyright}</Text>
+        <Text selectable style={styles.copyright}>{imageData?.copyright}</Text>
 
         {/* explanation */}
-        <Text style={styles.explanation}>{imageData?.explanation}</Text>
+        <Text selectable style={styles.explanation}>{imageData?.explanation}</Text>
 
         {/* divider */}
         <View style={styles.divider} />
 
         {/* word of the day */}
         <Text style={styles.wordLabel}>WORD OF THE DAY</Text>
-        <Text style={styles.word}>{wordData?.word}</Text>
-        <Text style={styles.definition}>{wordData?.definition}</Text>
+        <Text selectable style={styles.word}>{wordData?.word}</Text>
+        <Text selectable style={styles.definition}>{wordData?.definition}</Text>
 
         {/* synonyms */}
         <Text style={styles.synonymsLabel}>SYNONYMS</Text>
-        <Text style={styles.synonyms}>{wordData?.synonyms}</Text>
+        <Text selectable style={styles.synonyms}>{wordData?.synonyms}</Text>
 
         <View style={styles.bottomPadding} />
       </ScrollView>
@@ -318,9 +321,10 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   videoUrl: {
-    color: '#666666',
-    fontSize: 11,
+    color: '#3c7bc4',
+    fontSize: 13,
     textAlign: 'center',
     paddingHorizontal: 20,
+    textDecorationLine: 'underline',
   },
 })
