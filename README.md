@@ -58,7 +58,7 @@ apexis/
 
 ### Download the APK (android only)
 
-Download the latest APK from the [Releases](https://github.com/benaytms/apexis/releases/tag/v.1.0.3) page and install it directly.
+Download the latest APK from the [Releases](https://github.com/benaytms/apexis/releases/tag/v.1.0.4) page and install it directly.
 
 > You may need to enable **Install from unknown sources** in your phone's settings.
 
@@ -110,7 +110,7 @@ docker container prune          # Removes all stopped containers
 ---
 
 ## Version
-v.1.0.3
+v.1.0.4
 
 ---
 ## License
