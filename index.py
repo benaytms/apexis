@@ -361,13 +361,12 @@ def word_to_table(word_otd:dict, table_name:str)->bool:
 ###############################################################################################################################
 
 def parse_img_data(img_data:dict)->dict:
-    img_data = img_data['copyright'].replace('Text:', '')
     return {
         "title": img_data.get('title', 'No title'),
         "date": img_data.get('date', '01-01-0001'),
         "explanation": img_data.get('explanation', 'No explanation'),
         "url": img_data.get('url', 'No url'),
-        "copyright": img_data.get('copyright', 'NASA, ESA, CSA, STScI'),
+        "copyright": img_data.get('copyright', 'NASA, ESA, CSA, STScI').replace('Text:', ''),
         "media_type": img_data.get('media_type', 'image')
     }
     
