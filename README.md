@@ -108,6 +108,11 @@ docker container prune          # Removes all stopped containers
 - [Merriam-Webster API](https://dictionaryapi.com/)- Word dictionary
 
 ---
+## Todo
+
+- Add image saving option
+
+---
 
 ## Version
 v.1.0.4
