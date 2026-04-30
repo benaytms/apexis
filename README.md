@@ -89,7 +89,7 @@ Download the latest APK from the [Releases](https://github.com/benaytms/apexis/r
 | Service | Description |
 |---|---|
 |`api`| FastAPI server on port 8000 |
-|`cron`| Daily pipeline - runs at 06:00 UTC (03:00 BRT) |
+|`cron`| Daily pipeline - runs at 07:00 UTC (04:00 BRT) |
 |`db`| PostgreSQL on port 5433 |
 
 ### Useful commands
