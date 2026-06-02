@@ -49,7 +49,6 @@ apexis/
 ├── Procfile              ← Railway file
 ├── Dockerfile            ← Docker initializer
 ├── README.md
-└── requirements.txt      ← lists all dependencies
 ```
 
 ---
