@@ -6,17 +6,17 @@ stores them in a Postgresql Database, and sends
 a Discord notification on completion.
 
 Author: Benay Tomas
-
 Created: 2026-03-06
-
-Last edited: 2026-03-10
-
-Version: 1.0.3
+Last edited: 2026-11-24
 """
 
 import requests as rq
 import psycopg2
 import logging
+import time
+import re
+import html
+from datetime import date
 from config import DISCORD_WEBHOOK, DATABASE_URL, APOD_URL
 from config import MERRIAM_KEY, get_today
 from wonderwords import RandomWord
@@ -226,8 +226,11 @@ def word_coordinator()->dict:
 
 def get_image()->dict|None:
     """
-    Fetches NASA APOD and returns parsed image dict, or None on failure.
+    Fetches the latest NASA APOD and returns parsed image dict, or None on failure.
     Retries up to 3 times on server errors before giving up.
+
+    The new NASA Science API returns a LIST of entries (newest first), so we take
+    the first one. No API key is needed anymore.
     """
     max_attempts = 3
 
@@ -236,17 +239,35 @@ def get_image()->dict|None:
         try:
             response = rq.get(APOD_URL, timeout=10)
             if response.status_code == 200:
+                data = response.json()
+
+                # list endpoint -> list of entries; be tolerant if it ever returns one object
+                entry = data[0] if isinstance(data, list) and data else data
+                if not isinstance(entry, dict) or not entry:
+                    logger.error("NASA returned an empty or unexpected response")
+                    break
+
+                # sanity check: we asked for the latest, so the date should be recent, i guess bro
+                try:
+                    age = abs((date.fromisoformat(get_today()) - date.fromisoformat(entry["date"])).days)
+                except (KeyError, ValueError):
+                    age = None
+                if age is None or age > 3:
+                    logger.error(f"Unexpected APOD date: {entry.get('date')!r}")
+                    break
+
                 logger.info("NASA request successful")
-                return parse_img_data(response.json())
+                return parse_img_data(entry)
             elif response.status_code >= 500:
                 logger.warning(f"NASA API server error: {response.status_code}, retrying...")
+                time.sleep(5)
                 continue
             else:
-                # 400 type errors won't be fixed by retrying
                 logger.error(f"NASA API client error: {response.status_code}")
                 break
         except Exception as e:
             logger.error(f"NASA request failed: {e}")
+            time.sleep(5)
             continue
 
     send_notification(
@@ -361,16 +382,27 @@ def word_to_table(word_otd:dict, table_name:str)->bool:
 # ---------------------------------------------------- PARSE IMAGE DATA ------------------------------------------------------- #
 ###############################################################################################################################
 
+def clean_text(value)->str:
+    """
+    Removes HTML tags/entities that the new NASA API may leave in text fields.
+    """
+    if not value:
+        return ''
+    return html.unescape(re.sub(r'<[^>]+>', '', str(value))).strip()
+
 def parse_img_data(img_data:dict)->dict:
+    image_url = img_data.get('hdurl') or img_data.get('url') or 'No url'
+    copyright_ = clean_text(img_data.get('copyright')) or 'NASA, ESA, CSA, STScI'
+
     return {
-        "title": img_data.get('title', 'No title'),
-        "date": img_data.get('date', '01-01-0001'),
-        "explanation": img_data.get('explanation', 'No explanation'),
-        "url": img_data.get('url', 'No url'),
-        "copyright": img_data.get('copyright', 'NASA, ESA, CSA, STScI').replace('Text:', ''),
-        "media_type": img_data.get('media_type', 'image')
+        "title": clean_text(img_data.get('title')) or 'No title',
+        "date": img_data.get('date') or '01-01-0001',
+        "explanation": clean_text(img_data.get('explanation')) or 'No explanation',
+        "url": image_url,
+        "copyright": copyright_.replace('Text:', '').strip(),
+        "media_type": img_data.get('media_type') or 'image'
     }
-    
+
 ###############################################################################################################################
 # ---------------------------------------------------- PARSE IMAGE DATA ------------------------------------------------------- #
 
@@ -465,7 +497,7 @@ def main(drop_tables:bool=False)->None:
         logger.error(f"Failed to save word to database: {e}")
         exit(1)
 
-    # if both word and image were inserted correctly, sends notification
+    # if both word and image were inserted correctly, sends notification, deu bosta geral
     if inserted_word and inserted_img:
         send_notification(
             subject="🌌 APEXIS — Today's content is ready",

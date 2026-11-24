@@ -9,7 +9,7 @@ NASA_API = str(os.getenv('NASA_API'))
 DATABASE_URL = str(os.getenv('DATABASE_URL'))
 DISCORD_WEBHOOK = str(os.getenv('DISCORD_WEBHOOK'))
 MERRIAM_KEY = str(os.getenv('MERRIAM_KEY'))
-APOD_URL = "https://api.nasa.gov/planetary/apod?api_key=" + NASA_API
+APOD_URL = "https://science.nasa.gov/wp-json/wp/v2/apod-basic?per_page=1"
 
 def get_today()->str:
     return datetime.now(ZoneInfo("America/Sao_Paulo")).date().isoformat()
